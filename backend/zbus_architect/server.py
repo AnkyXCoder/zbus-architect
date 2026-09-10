@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from .checks import Check, run_checks
 from .codegen import generate_zbus_channels_h, generate_zbus_observers_c
 from .model import Architecture
 from .parser import parse_file, parse_source
@@ -54,7 +55,15 @@ def generate(payload: GeneratePayload) -> dict:
     wanted = set(payload.files or ["zbus_channels.h", "zbus_observers.c"])
     result: dict = {}
     if "zbus_channels.h" in wanted:
-        result["zbus_channels.h"] = generate_zbus_channels_h(payload.architecture)
+        result["zbus_channels.h"] = generate_zbus_channels_h(
+            payload.architecture)
     if "zbus_observers.c" in wanted:
-        result["zbus_observers.c"] = generate_zbus_observers_c(payload.architecture)
+        result["zbus_observers.c"] = generate_zbus_observers_c(
+            payload.architecture)
     return result
+
+
+@app.post("/checks")
+def checks(payload: ImportPath) -> list[Check]:
+    arch = parse_file(payload.path)
+    return run_checks(arch)

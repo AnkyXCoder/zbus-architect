@@ -8,6 +8,7 @@ from pathlib import Path
 
 import click
 
+from .checks import run_checks
 from .codegen import generate_zbus_channels_h, generate_zbus_observers_c
 from .parser import parse_file, parse_source
 
@@ -48,6 +49,16 @@ def generate(path: Path, out_dir: Path) -> None:
     (out_dir / "zbus_channels.h").write_text(generate_zbus_channels_h(arch))
     (out_dir / "zbus_observers.c").write_text(generate_zbus_observers_c(arch))
     click.echo(f"Generated in {out_dir}")
+
+
+@main.command()
+@click.argument("path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--pretty", is_flag=True)
+def check(path: Path, pretty: bool) -> None:
+    arch = parse_file(path)
+    results = run_checks(arch)
+    data = [c.model_dump() for c in results]
+    click.echo(json.dumps(data, indent=2 if pretty else None))
 
 
 if __name__ == "__main__":
