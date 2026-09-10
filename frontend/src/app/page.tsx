@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CheckPanel from "@/components/CheckPanel";
 import FlowCanvas from "@/components/FlowCanvas";
@@ -29,6 +29,28 @@ export default function Home() {
     const newArchitecture = useZbusStore((s) => s.newArchitecture);
     const clearAll = useZbusStore((s) => s.clearAll);
     const selectedNodeId = useZbusStore((s) => s.selectedNodeId);
+    const history = useZbusStore((s) => s.history);
+    const future = useZbusStore((s) => s.future);
+    const undo = useZbusStore((s) => s.undo);
+    const redo = useZbusStore((s) => s.redo);
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+                if (e.shiftKey) {
+                    redo();
+                } else {
+                    undo();
+                }
+                e.preventDefault();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+                redo();
+                e.preventDefault();
+            }
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, [undo, redo]);
 
     const handleImport = async () => {
         try {
@@ -111,6 +133,20 @@ export default function Home() {
                     className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-500"
                 >
                     Export
+                </button>
+                <button
+                    onClick={undo}
+                    disabled={!history.length}
+                    className="rounded bg-slate-500 px-3 py-1 text-sm font-medium text-white hover:bg-slate-600 disabled:opacity-40 dark:bg-slate-600 dark:hover:bg-slate-500"
+                >
+                    Undo
+                </button>
+                <button
+                    onClick={redo}
+                    disabled={!future.length}
+                    className="rounded bg-slate-500 px-3 py-1 text-sm font-medium text-white hover:bg-slate-600 disabled:opacity-40 dark:bg-slate-600 dark:hover:bg-slate-500"
+                >
+                    Redo
                 </button>
                 <button
                     onClick={() => setShowTutorial(true)}

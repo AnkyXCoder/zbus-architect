@@ -92,6 +92,7 @@ Once the page is open:
 - Drag components from the **Toolbar** onto the canvas.
 - Click a node to edit its properties in the right panel.
 - Click **Connect** in the sidebar to show connection dots, then drag from one block to another; the dots hide again once connected.
+- Click **Undo** or **Redo** (or press `Ctrl+Z` / `Ctrl+Shift+Z`) to step through your edits.
 - Click **Simulate publish** on a channel to see animated data-flow arrows and the message type being passed.
 - A **Legend** in the top-left explains node colors and edge styles.
 - Select a **Message Type** node to configure its fields (name, type, array size) and see the generated C struct.

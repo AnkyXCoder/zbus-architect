@@ -29,6 +29,8 @@ interface ZbusState {
     selectedNodeId: string | null;
     simulatingChannels: Set<string>;
     connectMode: boolean;
+    history: Architecture[];
+    future: Architecture[];
     setArchitecture: (architecture: Architecture) => void;
     newArchitecture: () => void;
     clearAll: () => void;
@@ -37,6 +39,8 @@ interface ZbusState {
     simulatePublish: (channelName: string) => void;
     clearSimulation: () => void;
     setConnectMode: (value: boolean) => void;
+    undo: () => void;
+    redo: () => void;
 
     addChannel: (channel: Channel) => void;
     addObserver: (observer: Observer) => void;
@@ -68,173 +72,164 @@ function emptyArchitecture(): Architecture {
     };
 }
 
-export const useZbusStore = create<ZbusState>((set) => ({
-    architecture: null,
-    checks: [],
-    selectedNodeId: null,
-    simulatingChannels: new Set(),
-    connectMode: false,
+const HISTORY_LIMIT = 50;
 
-    setArchitecture: (architecture) => set({ architecture }),
-    newArchitecture: () => set({ architecture: emptyArchitecture(), selectedNodeId: null }),
-    clearAll: () => set({ architecture: null, checks: [], selectedNodeId: null, simulatingChannels: new Set() }),
-    setChecks: (checks) => set({ checks }),
-    setSelectedNodeId: (id) => set({ selectedNodeId: id }),
-    setConnectMode: (value) => set({ connectMode: value }),
-    simulatePublish: (channelName) => {
-        set((s) => ({ simulatingChannels: new Set(s.simulatingChannels).add(channelName) }));
-        setTimeout(() => {
-            set((s) => {
-                const next = new Set(s.simulatingChannels);
-                next.delete(channelName);
-                return { simulatingChannels: next };
+export const useZbusStore = create<ZbusState>((set, get) => {
+    const mutate = (fn: (arch: Architecture) => Architecture) =>
+        set((s) => {
+            if (!s.architecture) return s;
+            const next = fn(s.architecture);
+            return {
+                architecture: next,
+                history: [...s.history.slice(-(HISTORY_LIMIT - 1)), s.architecture],
+                future: [],
+            };
+        });
+
+    return {
+        architecture: null,
+        checks: [],
+        selectedNodeId: null,
+        simulatingChannels: new Set(),
+        connectMode: false,
+        history: [],
+        future: [],
+
+        setArchitecture: (architecture) =>
+            set({ architecture, history: [], future: [], selectedNodeId: null }),
+        newArchitecture: () =>
+            set({ architecture: emptyArchitecture(), history: [], future: [], selectedNodeId: null }),
+        clearAll: () =>
+            set({ architecture: null, checks: [], selectedNodeId: null, simulatingChannels: new Set(), history: [], future: [] }),
+        setChecks: (checks) => set({ checks }),
+        setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+        setConnectMode: (value) => set({ connectMode: value }),
+        simulatePublish: (channelName) => {
+            set((s) => ({ simulatingChannels: new Set(s.simulatingChannels).add(channelName) }));
+            setTimeout(() => {
+                set((s) => {
+                    const next = new Set(s.simulatingChannels);
+                    next.delete(channelName);
+                    return { simulatingChannels: next };
+                });
+            }, 1500);
+        },
+        clearSimulation: () => set({ simulatingChannels: new Set() }),
+
+        undo: () => {
+            const { architecture, history, future } = get();
+            if (!history.length || !architecture) return;
+            const prev = history[history.length - 1];
+            set({
+                architecture: prev,
+                history: history.slice(0, -1),
+                future: [architecture, ...future].slice(0, HISTORY_LIMIT),
+                selectedNodeId: null,
             });
-        }, 1500);
-    },
-    clearSimulation: () => set({ simulatingChannels: new Set() }),
+        },
 
-    addChannel: (channel) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? { ...s.architecture, channels: [...s.architecture.channels, channel] }
-                : s.architecture,
-        })),
+        redo: () => {
+            const { architecture, history, future } = get();
+            if (!future.length || !architecture) return;
+            const next = future[0];
+            set({
+                architecture: next,
+                history: [...history.slice(-(HISTORY_LIMIT - 1)), architecture],
+                future: future.slice(1),
+                selectedNodeId: null,
+            });
+        },
 
-    addObserver: (observer) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? { ...s.architecture, observers: [...s.architecture.observers, observer] }
-                : s.architecture,
-        })),
+        addChannel: (channel) =>
+            mutate((arch) => ({ ...arch, channels: [...arch.channels, channel] })),
 
-    addThread: (thread) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? { ...s.architecture, threads: [...s.architecture.threads, thread] }
-                : s.architecture,
-        })),
+        addObserver: (observer) =>
+            mutate((arch) => ({ ...arch, observers: [...arch.observers, observer] })),
 
-    addMessage: (message) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? { ...s.architecture, messages: [...s.architecture.messages, message] }
-                : s.architecture,
-        })),
+        addThread: (thread) =>
+            mutate((arch) => ({ ...arch, threads: [...arch.threads, thread] })),
 
-    addProxyAgent: (agent) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? { ...s.architecture, proxy_agents: [...s.architecture.proxy_agents, agent] }
-                : s.architecture,
-        })),
+        addMessage: (message) =>
+            mutate((arch) => ({ ...arch, messages: [...arch.messages, message] })),
 
-    updateChannel: (name, channel) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? {
-                    ...s.architecture,
-                    channels: s.architecture.channels.map((c) =>
-                        c.name === name ? channel : c
+        addProxyAgent: (agent) =>
+            mutate((arch) => ({ ...arch, proxy_agents: [...arch.proxy_agents, agent] })),
+
+        updateChannel: (name, channel) =>
+            mutate((arch) => ({
+                ...arch,
+                channels: arch.channels.map((c) => (c.name === name ? channel : c)),
+            })),
+
+        updateObserver: (name, observer) =>
+            mutate((arch) => ({
+                ...arch,
+                observers: arch.observers.map((o) => (o.name === name ? observer : o)),
+            })),
+
+        updateThread: (name, thread) =>
+            mutate((arch) => ({
+                ...arch,
+                threads: arch.threads.map((t) => (t.name === name ? thread : t)),
+            })),
+
+        updateMessage: (name, message) =>
+            mutate((arch) => ({
+                ...arch,
+                messages: arch.messages.map((m) => (m.name === name ? message : m)),
+            })),
+
+        updateProxyAgent: (name, agent) =>
+            mutate((arch) => ({
+                ...arch,
+                proxy_agents: arch.proxy_agents.map((a) => (a.name === name ? agent : a)),
+            })),
+
+        addObservation: (channel, observer) =>
+            mutate((arch) => {
+                const ch = arch.channels.find((c) => c.name === channel);
+                if (!ch || ch.observers.includes(observer)) return arch;
+                return {
+                    ...arch,
+                    channels: arch.channels.map((c) =>
+                        c.name === channel ? { ...c, observers: [...c.observers, observer] } : c
                     ),
+                };
+            }),
+
+        removeObservation: (channel, observer) =>
+            mutate((arch) => ({
+                ...arch,
+                channels: arch.channels.map((c) =>
+                    c.name === channel
+                        ? { ...c, observers: c.observers.filter((o) => o !== observer) }
+                        : c
+                ),
+            })),
+
+        removeNode: (id) =>
+            mutate((arch) => {
+                const [kind, ...rest] = id.split("-");
+                const name = rest.join("-");
+                const next = { ...arch };
+                if (kind === "ch") {
+                    next.channels = next.channels.filter((c) => c.name !== name);
+                } else if (kind === "obs") {
+                    next.observers = next.observers.filter((o) => o.name !== name);
+                    next.channels = next.channels.map((c) => ({
+                        ...c,
+                        observers: c.observers.filter((o) => o !== name),
+                    }));
+                } else if (kind === "thr") {
+                    next.threads = next.threads.filter((t) => t.name !== name);
+                } else if (kind === "msg") {
+                    next.messages = next.messages.filter((m) => m.name !== name);
+                } else if (kind === "prx") {
+                    next.proxy_agents = next.proxy_agents.filter((a) => a.name !== name);
                 }
-                : s.architecture,
-        })),
+                return next;
+            }),
 
-    updateObserver: (name, observer) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? {
-                    ...s.architecture,
-                    observers: s.architecture.observers.map((o) =>
-                        o.name === name ? observer : o
-                    ),
-                }
-                : s.architecture,
-        })),
-
-    updateThread: (name, thread) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? {
-                    ...s.architecture,
-                    threads: s.architecture.threads.map((t) =>
-                        t.name === name ? thread : t
-                    ),
-                }
-                : s.architecture,
-        })),
-
-    updateMessage: (name, message) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? {
-                    ...s.architecture,
-                    messages: s.architecture.messages.map((m) =>
-                        m.name === name ? message : m
-                    ),
-                }
-                : s.architecture,
-        })),
-
-    updateProxyAgent: (name, agent) =>
-        set((s) => ({
-            architecture: s.architecture
-                ? {
-                    ...s.architecture,
-                    proxy_agents: s.architecture.proxy_agents.map((a) =>
-                        a.name === name ? agent : a
-                    ),
-                }
-                : s.architecture,
-        })),
-
-    addObservation: (channel, observer) =>
-        set((s) => {
-            if (!s.architecture) return s;
-            const chan = s.architecture.channels.find((c) => c.name === channel);
-            if (!chan) return s;
-            const already = chan.observers.includes(observer);
-            if (already) return s;
-            const nextChannels = s.architecture.channels.map((c) =>
-                c.name === channel ? { ...c, observers: [...c.observers, observer] } : c
-            );
-            return { architecture: { ...s.architecture, channels: nextChannels } };
-        }),
-
-    removeObservation: (channel, observer) =>
-        set((s) => {
-            if (!s.architecture) return s;
-            const nextChannels = s.architecture.channels.map((c) =>
-                c.name === channel
-                    ? { ...c, observers: c.observers.filter((o) => o !== observer) }
-                    : c
-            );
-            return { architecture: { ...s.architecture, channels: nextChannels } };
-        }),
-
-    removeNode: (id) =>
-        set((s) => {
-            if (!s.architecture) return s;
-            const [kind, name] = id.split("-");
-            const next = { ...s.architecture };
-            if (kind === "ch") {
-                next.channels = next.channels.filter((c) => c.name !== name);
-            } else if (kind === "obs") {
-                next.observers = next.observers.filter((o) => o.name !== name);
-                next.channels = next.channels.map((c) => ({
-                    ...c,
-                    observers: c.observers.filter((o) => o !== name),
-                }));
-            } else if (kind === "thr") {
-                next.threads = next.threads.filter((t) => t.name !== name);
-            } else if (kind === "msg") {
-                next.messages = next.messages.filter((m) => m.name !== name);
-            } else if (kind === "prx") {
-                next.proxy_agents = next.proxy_agents.filter((a) => a.name !== name);
-            }
-            return { architecture: next, selectedNodeId: null };
-        }),
-
-    updateNodePosition: (id, position) =>
-        set((s) => ({ ...s })),
-}));
+        updateNodePosition: () => undefined,
+    };
+});

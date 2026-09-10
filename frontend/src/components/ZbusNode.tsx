@@ -24,8 +24,9 @@ export default function ZbusNode({ type, data, selected }: any) {
     const connectMode = useZbusStore((s) => s.connectMode);
     const base = NODE_STYLES[type] || "bg-slate-600 border-slate-700";
     const selectedRing = selected ? "ring-2 ring-white" : "";
-    const showSource = connectMode && hasSource(type);
-    const showTarget = connectMode && hasTarget(type);
+    const showSource = hasSource(type);
+    const showTarget = hasTarget(type);
+    const hidden = !connectMode ? "opacity-0 pointer-events-none" : "";
 
     return (
         <div className={`relative rounded border-2 px-3 py-2 text-sm text-white shadow ${base} ${selectedRing}`}>
@@ -33,7 +34,7 @@ export default function ZbusNode({ type, data, selected }: any) {
                 <Handle
                     type="target"
                     position={Position.Left}
-                    className="!bg-white !border-slate-600"
+                    className={`!bg-white !border-slate-600 ${hidden}`}
                 />
             )}
             <div className="font-medium">{data.label}</div>
@@ -56,7 +57,7 @@ export default function ZbusNode({ type, data, selected }: any) {
                 <Handle
                     type="source"
                     position={Position.Right}
-                    className="!bg-white !border-slate-600"
+                    className={`!bg-white !border-slate-600 ${hidden}`}
                 />
             )}
         </div>

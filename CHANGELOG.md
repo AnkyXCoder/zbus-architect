@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Rich tutorial architecture using all zbus macro combinations (listeners, subscribers, async listeners, message subscribers, threads, proxy agents, shadow channels, and runtime observations).
 - Visual data-flow simulation: click "Simulate publish" on a channel to animate arrows to its observers.
 - Custom node types with color coding, subtitles, and on-demand connection dots (Connect button toggles them; they hide after connecting).
+- Undo/redo support with Ctrl+Z / Ctrl+Shift+Z and toolbar buttons.
 - Message-type nodes show no connection dots.
 - Message field editor in the property panel (name, type, array size) that regenerates the C struct definition.
 - Improved edge styling with smoothstep lines and arrowheads.
