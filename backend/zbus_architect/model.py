@@ -37,6 +37,15 @@ class Thread(BaseModel):
     delay: Optional[int] = None
 
 
+class ProxyAgent(BaseModel):
+    """A zbus proxy agent with a backend type and a list of forwarded channels."""
+
+    name: str
+    backend_type: str
+    backend_dt_node: str
+    channels: list[str] = Field(default_factory=list)
+
+
 class ChannelObservation(BaseModel):
     """A channel -> observer link with notification sequence priority."""
 
@@ -66,6 +75,7 @@ class Architecture(BaseModel):
     channels: list[Channel] = Field(default_factory=list)
     observers: list[Observer] = Field(default_factory=list)
     threads: list[Thread] = Field(default_factory=list)
+    proxy_agents: list[ProxyAgent] = Field(default_factory=list)
     add_observations: list[ChannelObservation] = Field(default_factory=list)
     messages: list[MessageType] = Field(default_factory=list)
 
@@ -80,6 +90,7 @@ class Architecture(BaseModel):
         obs: list[ChannelObservation] = []
         for ch in self.channels:
             for obs_name in ch.observers:
-                obs.append(ChannelObservation(channel=ch.name, observer=obs_name))
+                obs.append(ChannelObservation(
+                    channel=ch.name, observer=obs_name))
         obs.extend(self.add_observations)
         return obs

@@ -70,13 +70,13 @@ _ZBUS_OBSERVERS_C_TEMPLATE = """
 
 {%- for obs in architecture.observers %}
 {%- if obs.kind == "listener" %}
-ZBUS_LISTENER_DEFINE({{ obs.name }}, {{ obs.callback }});
+ZBUS_LISTENER_DEFINE_WITH_ENABLE({{ obs.name }}, {{ obs.callback }}, {{ 'true' if obs.enabled else 'false' }});
 {%- elif obs.kind == "subscriber" %}
-ZBUS_SUBSCRIBER_DEFINE({{ obs.name }}, {{ obs.queue_size or 1 }});
+ZBUS_SUBSCRIBER_DEFINE_WITH_ENABLE({{ obs.name }}, {{ obs.queue_size or 1 }}, {{ 'true' if obs.enabled else 'false' }});
 {%- elif obs.kind == "msg_subscriber" %}
-ZBUS_MSG_SUBSCRIBER_DEFINE({{ obs.name }});
+ZBUS_MSG_SUBSCRIBER_DEFINE_WITH_ENABLE({{ obs.name }}, {{ 'true' if obs.enabled else 'false' }});
 {%- elif obs.kind == "async_listener" %}
-ZBUS_ASYNC_LISTENER_DEFINE({{ obs.name }}, {{ obs.callback }});
+ZBUS_ASYNC_LISTENER_DEFINE_WITH_ENABLE({{ obs.name }}, {{ obs.callback }}, {{ 'true' if obs.enabled else 'false' }});
 {%- endif %}
 {%- endfor %}
 

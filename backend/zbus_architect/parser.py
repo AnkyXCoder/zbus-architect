@@ -10,7 +10,14 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .model import Architecture, Channel, ChannelObservation, Observer, Thread
+from .model import (
+    Architecture,
+    Channel,
+    ChannelObservation,
+    Observer,
+    ProxyAgent,
+    Thread,
+)
 from .struct_parser import parse_structs
 
 DQ = chr(34)
@@ -153,11 +160,14 @@ def parse_listener(arg_text: str) -> Observer:
     args = split_arguments(arg_text)
     if len(args) < 2:
         raise ValueError(f"ZBUS_LISTENER_DEFINE needs 2 args, got {len(args)}")
+    enabled = True
+    if len(args) >= 3:
+        enabled = args[2].strip().lower() in ("true", "1")
     return Observer(
         name=args[0].strip(),
         kind="listener",
         callback=args[1].strip().strip("&"),
-        enabled=True,
+        enabled=enabled,
     )
 
 
@@ -171,11 +181,14 @@ def parse_subscriber(arg_text: str) -> Observer:
         queue_size = int(args[1].strip())
     except ValueError:
         pass
+    enabled = True
+    if len(args) >= 3:
+        enabled = args[2].strip().lower() in ("true", "1")
     return Observer(
         name=args[0].strip(),
         kind="subscriber",
         queue_size=queue_size,
-        enabled=True,
+        enabled=enabled,
     )
 
 
@@ -183,10 +196,13 @@ def parse_msg_subscriber(arg_text: str) -> Observer:
     args = split_arguments(arg_text)
     if not args:
         raise ValueError("ZBUS_MSG_SUBSCRIBER_DEFINE needs at least 1 arg")
+    enabled = True
+    if len(args) >= 2:
+        enabled = args[1].strip().lower() in ("true", "1")
     return Observer(
         name=args[0].strip(),
         kind="msg_subscriber",
-        enabled=True,
+        enabled=enabled,
     )
 
 
@@ -195,11 +211,14 @@ def parse_async_listener(arg_text: str) -> Observer:
     if len(args) < 2:
         raise ValueError(
             f"ZBUS_ASYNC_LISTENER_DEFINE needs 2 args, got {len(args)}")
+    enabled = True
+    if len(args) >= 3:
+        enabled = args[2].strip().lower() in ("true", "1")
     return Observer(
         name=args[0].strip(),
         kind="async_listener",
         callback=args[1].strip().strip("&"),
-        enabled=True,
+        enabled=enabled,
     )
 
 
@@ -246,6 +265,80 @@ def _int_or_none(text: str) -> int | None:
         return None
 
 
+def parse_shadow_channel(
+    arg_text: str, with_id: bool = False
+) -> Channel:
+    args = split_arguments(arg_text)
+    if with_id:
+        if len(args) < 7:
+            raise ValueError(
+                f"ZBUS_SHADOW_CHAN_DEFINE_WITH_ID needs 7 args, got {len(args)}"
+            )
+        name = args[0].strip()
+        channel_id = _int_or_none(args[1])
+        message_type = args[2].strip()
+        proxy_agent = args[3].strip().strip("&")
+        user_data = _clean_token(args[4]) if _clean_token(
+            args[4]) != "NULL" else None
+        observers = _parse_observers_arg(args[5])
+        initial_value = _parse_initial_value_arg(args[6])
+        return Channel(
+            name=name,
+            channel_id=channel_id,
+            message_type=message_type,
+            validator=None,
+            user_data=user_data,
+            observers=observers,
+            initial_value=initial_value,
+            is_shadow=True,
+            proxy_agent=proxy_agent,
+        )
+    if len(args) < 6:
+        raise ValueError(
+            f"ZBUS_SHADOW_CHAN_DEFINE needs 6 args, got {len(args)}")
+    name = args[0].strip()
+    message_type = args[1].strip()
+    proxy_agent = args[2].strip().strip("&")
+    user_data = _clean_token(args[3]) if _clean_token(
+        args[3]) != "NULL" else None
+    observers = _parse_observers_arg(args[4])
+    initial_value = _parse_initial_value_arg(args[5])
+    return Channel(
+        name=name,
+        message_type=message_type,
+        validator=None,
+        user_data=user_data,
+        observers=observers,
+        initial_value=initial_value,
+        is_shadow=True,
+        proxy_agent=proxy_agent,
+    )
+
+
+def parse_proxy_agent(arg_text: str) -> ProxyAgent:
+    args = split_arguments(arg_text)
+    if len(args) < 3:
+        raise ValueError(
+            f"ZBUS_PROXY_AGENT_DEFINE needs 3 args, got {len(args)}")
+    return ProxyAgent(
+        name=args[0].strip(),
+        backend_type=args[1].strip(),
+        backend_dt_node=args[2].strip(),
+    )
+
+
+def parse_proxy_add_chan(arg_text: str) -> ChannelObservation:
+    args = split_arguments(arg_text)
+    if len(args) < 2:
+        raise ValueError(f"ZBUS_PROXY_ADD_CHAN needs 2 args, got {len(args)}")
+    agent = args[0].strip().strip("&")
+    return ChannelObservation(
+        channel=args[1].strip().strip("&"),
+        observer=f"{agent}_listener",
+        priority="zz",
+    )
+
+
 def parse_source(text: str) -> Architecture:
     text = remove_c_comments(text)
     arch = Architecture()
@@ -268,7 +361,19 @@ def parse_source(text: str) -> Architecture:
         except ValueError:
             pass
 
+    for arg_text in find_macro_calls(text, "ZBUS_LISTENER_DEFINE_WITH_ENABLE"):
+        try:
+            arch.observers.append(parse_listener(arg_text))
+        except ValueError:
+            pass
+
     for arg_text in find_macro_calls(text, "ZBUS_SUBSCRIBER_DEFINE"):
+        try:
+            arch.observers.append(parse_subscriber(arg_text))
+        except ValueError:
+            pass
+
+    for arg_text in find_macro_calls(text, "ZBUS_SUBSCRIBER_DEFINE_WITH_ENABLE"):
         try:
             arch.observers.append(parse_subscriber(arg_text))
         except ValueError:
@@ -280,7 +385,19 @@ def parse_source(text: str) -> Architecture:
         except ValueError:
             pass
 
+    for arg_text in find_macro_calls(text, "ZBUS_MSG_SUBSCRIBER_DEFINE_WITH_ENABLE"):
+        try:
+            arch.observers.append(parse_msg_subscriber(arg_text))
+        except ValueError:
+            pass
+
     for arg_text in find_macro_calls(text, "ZBUS_ASYNC_LISTENER_DEFINE"):
+        try:
+            arch.observers.append(parse_async_listener(arg_text))
+        except ValueError:
+            pass
+
+    for arg_text in find_macro_calls(text, "ZBUS_ASYNC_LISTENER_DEFINE_WITH_ENABLE"):
         try:
             arch.observers.append(parse_async_listener(arg_text))
         except ValueError:
@@ -296,6 +413,30 @@ def parse_source(text: str) -> Architecture:
         try:
             arch.add_observations.append(
                 parse_add_obs(arg_text, with_mask=True))
+        except ValueError:
+            pass
+
+    for arg_text in find_macro_calls(text, "ZBUS_SHADOW_CHAN_DEFINE"):
+        try:
+            arch.channels.append(parse_shadow_channel(arg_text))
+        except ValueError:
+            pass
+
+    for arg_text in find_macro_calls(text, "ZBUS_SHADOW_CHAN_DEFINE_WITH_ID"):
+        try:
+            arch.channels.append(parse_shadow_channel(arg_text, with_id=True))
+        except ValueError:
+            pass
+
+    for arg_text in find_macro_calls(text, "ZBUS_PROXY_AGENT_DEFINE"):
+        try:
+            arch.proxy_agents.append(parse_proxy_agent(arg_text))
+        except ValueError:
+            pass
+
+    for arg_text in find_macro_calls(text, "ZBUS_PROXY_ADD_CHAN"):
+        try:
+            arch.add_observations.append(parse_proxy_add_chan(arg_text))
         except ValueError:
             pass
 
