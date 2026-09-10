@@ -28,29 +28,64 @@ A design-first, web-based visual architect for Zephyr's `zbus` message bus.
 - Node.js 18+ and npm
 - A west workspace with Zephyr (e.g. the `iNode` workspace in this repo)
 
-## Quick start
+## Installation
 
 ```bash
 cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
 
-# Backend
+# Python backend
 python -m venv .venv
 .venv/bin/pip install -e .[test]
 
-# Parse, check, and export a fixture
+# Next.js frontend
+cd frontend
+npm ci
+```
+
+## Quick start
+
+### CLI
+
+```bash
+cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
+
+# Parse an existing zbus source file
 PYTHONPATH=backend .venv/bin/python -m zbus_architect.cli import fixtures/hello_world.c --pretty
+
+# Run design checks
 PYTHONPATH=backend .venv/bin/python -m zbus_architect.cli check fixtures/hello_world.c --pretty
+
+# Generate C files
 PYTHONPATH=backend .venv/bin/python -m zbus_architect.cli generate fixtures/hello_world.c -d build_test/src
 
-# Run Python tests
+# Run the test suite
 PYTHONPATH=backend .venv/bin/python -m pytest backend/tests
+```
 
-# Frontend
-cd frontend
-npm install
-npm run build
+### Webpage
+
+1. Start the backend API server:
+
+```bash
+cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
+.venv/bin/uvicorn zbus_architect.server:app --reload
+```
+
+2. In another terminal, start the frontend:
+
+```bash
+cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect/frontend
 npm run dev
 ```
+
+3. Open `http://localhost:3000` in your browser.
+
+4. Enter an absolute C source path (for example `/home/ankit/Workspaces/fwProjects/iNode/os/zephyr/samples/subsys/zbus/hello_world/src/main.c`) and click **Import**.
+
+5. The page shows:
+   - A **React Flow graph** of channels, observers, and threads on the left.
+   - A **CheckPanel** on the right with duplicate, unobserved, orphan, and cycle diagnostics.
+   - An **Export** button to download `zbus_channels.h`, `zbus_observers.c`, and `zbus_messages.h`.
 
 ## West build test
 
