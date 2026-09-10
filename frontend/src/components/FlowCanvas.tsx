@@ -169,10 +169,9 @@ function CanvasInner() {
                 id,
                 source,
                 target,
-                type: "smoothstep",
                 label: opts.label,
                 animated: !!opts.animated,
-                markerEnd: { type: MarkerType.ArrowClosed },
+                markerEnd: { type: MarkerType.Arrow },
                 style: {
                     strokeWidth: opts.animated ? 3 : 2,
                     strokeDasharray: opts.dashed ? "5 5" : undefined,
