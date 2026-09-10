@@ -27,11 +27,14 @@ interface ZbusState {
     architecture: Architecture | null;
     checks: ZbusCheck[];
     selectedNodeId: string | null;
+    simulatingChannels: Set<string>;
     setArchitecture: (architecture: Architecture) => void;
     newArchitecture: () => void;
     clearAll: () => void;
     setChecks: (checks: ZbusCheck[]) => void;
     setSelectedNodeId: (id: string | null) => void;
+    simulatePublish: (channelName: string) => void;
+    clearSimulation: () => void;
 
     addChannel: (channel: Channel) => void;
     addObserver: (observer: Observer) => void;
@@ -67,12 +70,24 @@ export const useZbusStore = create<ZbusState>((set) => ({
     architecture: null,
     checks: [],
     selectedNodeId: null,
+    simulatingChannels: new Set(),
 
     setArchitecture: (architecture) => set({ architecture }),
     newArchitecture: () => set({ architecture: emptyArchitecture(), selectedNodeId: null }),
-    clearAll: () => set({ architecture: null, checks: [], selectedNodeId: null }),
+    clearAll: () => set({ architecture: null, checks: [], selectedNodeId: null, simulatingChannels: new Set() }),
     setChecks: (checks) => set({ checks }),
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+    simulatePublish: (channelName) => {
+        set((s) => ({ simulatingChannels: new Set(s.simulatingChannels).add(channelName) }));
+        setTimeout(() => {
+            set((s) => {
+                const next = new Set(s.simulatingChannels);
+                next.delete(channelName);
+                return { simulatingChannels: next };
+            });
+        }, 1500);
+    },
+    clearSimulation: () => set({ simulatingChannels: new Set() }),
 
     addChannel: (channel) =>
         set((s) => ({

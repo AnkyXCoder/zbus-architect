@@ -97,6 +97,7 @@ function ChannelForm({
     channel: Channel;
     update: (ch: Channel) => void;
 }) {
+    const simulatePublish = useZbusStore((s) => s.simulatePublish);
     const [form, setForm] = useState<Channel>(channel);
 
     useEffect(() => {
@@ -156,6 +157,12 @@ function ChannelForm({
                 className="mt-2 w-full rounded bg-blue-600 px-2 py-1 text-sm font-medium text-white hover:bg-blue-500"
             >
                 Save
+            </button>
+            <button
+                onClick={() => simulatePublish(channel.name)}
+                className="mt-2 w-full rounded bg-cyan-600 px-2 py-1 text-sm font-medium text-white hover:bg-cyan-500"
+            >
+                Simulate publish
             </button>
         </div>
     );

@@ -5,6 +5,7 @@ import {
     Background,
     Connection,
     Controls,
+    MarkerType,
     ReactFlow,
     ReactFlowProvider,
     useEdgesState,
@@ -24,6 +25,7 @@ const NODE_STYLE = {
 
 function CanvasInner() {
     const architecture = useZbusStore((s) => s.architecture);
+    const simulatingChannels = useZbusStore((s) => s.simulatingChannels);
     const addChannel = useZbusStore((s) => s.addChannel);
     const addObserver = useZbusStore((s) => s.addObserver);
     const addThread = useZbusStore((s) => s.addThread);
@@ -104,19 +106,42 @@ function CanvasInner() {
         });
 
         const newEdges: any[] = [];
+        const edgeIds = new Set<string>();
+
+        const addEdge = (id: string, source: string, target: string, style?: any, label?: string) => {
+            if (edgeIds.has(id)) return;
+            edgeIds.add(id);
+            newEdges.push({
+                id,
+                source,
+                target,
+                label,
+                animated: simulatingChannels.has(source.replace("ch-", "")) || simulatingChannels.has(source.replace("prx-", "")),
+                markerEnd: { type: MarkerType.Arrow },
+                style: { strokeWidth: 2, ...style },
+            });
+        };
+
         (arch.channels || []).forEach((ch: any) => {
             (ch.observers || []).forEach((obsName: string) => {
-                newEdges.push({
-                    id: `${ch.name}-${obsName}`,
-                    source: `ch-${ch.name}`,
-                    target: `obs-${obsName}`,
-                });
+                addEdge(`${ch.name}-${obsName}`, `ch-${ch.name}`, `obs-${obsName}`);
             });
+        });
+
+        (arch.add_observations || []).forEach((obs: any) => {
+            const targetId = `obs-${obs.observer}`;
+            addEdge(`add-${obs.channel}-${obs.observer}`, `ch-${obs.channel}`, targetId, { strokeDasharray: "5 5" });
+        });
+
+        (arch.channels || []).forEach((ch: any) => {
+            if (ch.proxy_agent) {
+                addEdge(`proxy-${ch.proxy_agent}-${ch.name}`, `prx-${ch.proxy_agent}`, `ch-${ch.name}`, { strokeDasharray: "2 2" }, "shadow");
+            }
         });
 
         setNodes(newNodes);
         setEdges(newEdges);
-    }, [architecture, setNodes, setEdges]);
+    }, [architecture, simulatingChannels, setNodes, setEdges]);
 
     const onConnect = useCallback(
         (connection: Connection) => {

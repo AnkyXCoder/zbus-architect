@@ -1,7 +1,7 @@
 "use client";
 
-import { HELLO_WORLD_EXAMPLE, TUTORIAL_STEPS } from "@/lib/example";
-import { importText, runChecks } from "@/lib/api";
+import { TUTORIAL_ARCHITECTURE, TUTORIAL_STEPS } from "@/lib/tutorialArchitecture";
+import { runChecks } from "@/lib/api";
 import { useZbusStore } from "@/store/useZbusStore";
 
 export default function TutorialPanel({ onClose }: { onClose: () => void }) {
@@ -10,9 +10,8 @@ export default function TutorialPanel({ onClose }: { onClose: () => void }) {
 
     const loadExample = async () => {
         try {
-            const arch = await importText(HELLO_WORLD_EXAMPLE);
-            const checks = await runChecks(arch);
-            setArchitecture(arch);
+            const checks = await runChecks(TUTORIAL_ARCHITECTURE);
+            setArchitecture(TUTORIAL_ARCHITECTURE);
             setChecks(checks);
             onClose();
         } catch (err: any) {
@@ -26,6 +25,11 @@ export default function TutorialPanel({ onClose }: { onClose: () => void }) {
                 <h2 className="mb-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
                     Quick tutorial
                 </h2>
+                <p className="mb-4 text-sm text-slate-700 dark:text-slate-300">
+                    The example below uses channels, listeners, subscribers, message
+                    subscribers, async listeners, a thread, a proxy agent, a shadow
+                    channel, and runtime observations.
+                </p>
                 <ol className="mb-6 list-decimal space-y-2 pl-5 text-sm text-slate-700 dark:text-slate-300">
                     {TUTORIAL_STEPS.map((step, i) => (
                         <li key={i}>{step}</li>

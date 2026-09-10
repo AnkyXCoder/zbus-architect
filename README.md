@@ -10,7 +10,7 @@ A design-first, web-based visual architect for Zephyr's `zbus` message bus.
 - **Code generator** — emits `zbus_channels.h` and `zbus_observers.c` using the same macros found in real Zephyr code.
 - **Static design checks** — duplicate channels/IDs/observers, unobserved channels, orphan observers, message-flow cycles.
 - **More macro coverage** — `_WITH_ENABLE` observer variants, shadow channels, proxy agents, and proxy channel links.
-- **Next.js + React Flow frontend** — drag and drop zbus components, connect them, edit properties, run checks, and export generated code.
+- **Next.js + React Flow frontend** — drag and drop zbus components, connect them, edit properties, simulate data-flow, run checks, and export generated code.
 - **FastAPI backend** — REST endpoints for `/import/file`, `/import/text`, `/generate`, and `/checks`.
 - **CLI** — `zbus-architect import`, `zbus-architect generate`, `zbus-architect check`.
 - **Verified build** — `build_test/` imports `samples/subsys/zbus/hello_world` and builds on `native_sim` using `zephyr-mcp-server`.
@@ -86,29 +86,22 @@ cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect/frontend
 npm run dev
 ```
 
-4. Enter an absolute C source path (for example `/home/ankit/Workspaces/fwProjects/iNode/os/zephyr/samples/subsys/zbus/hello_world/src/main.c`) and click **Import**.
+Once the page is open:
 
-5. Use the page:
-   - Drag components from the **Toolbar** onto the canvas.
-   - Click a node to edit its properties in the right panel.
-   - Drag from the right side of a channel to the left side of an observer to connect them.
-   - Click **Check** to validate the model.
-   - Click **Export** to download `zbus_messages.h`, `zbus_channels.h`, and `zbus_observers.c`.
-
-   - Click **Tutorial** to open a step-by-step guide and load a working example.
-   - Click **New** to start a blank design.
-   - Click **Clear** to wipe the canvas and build your own configuration from scratch.
+- Enter an absolute C source path (for example `/home/ankit/Workspaces/fwProjects/iNode/os/zephyr/samples/subsys/zbus/hello_world/src/main.c`) and click **Import**, or click **Tutorial** to load a built-in example.
+- Drag components from the **Toolbar** onto the canvas.
+- Click a node to edit its properties in the right panel.
+- Drag from the right side of a channel to the left side of an observer to connect them.
+- Click **Simulate publish** on a channel to see animated data-flow arrows to its observers.
+- Click **Check** to validate the model.
+- Click **Export** to download `zbus_messages.h`, `zbus_channels.h`, and `zbus_observers.c`.
+- Click **New** to start a blank design, or **Clear** to wipe the canvas and build your own configuration from scratch.
 
 ## Tutorial / example
 
-The page includes a built-in tutorial. Click **Tutorial** in the top-right to:
+The page includes a built-in tutorial. Click **Tutorial** in the top-right to load a complete zbus design that includes channels, listeners, subscribers, message subscribers, async listeners, threads, a proxy agent, a shadow channel, and runtime observations.
 
-1. Load the `hello_world` example design on the canvas.
-2. See how channels, observers, and threads are connected.
-3. Edit properties and re-run checks.
-4. Export the generated C files.
-
-You can also run the same example from the command line:
+You can also run the same fixture from the command line:
 
 ```bash
 cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
