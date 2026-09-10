@@ -8,8 +8,9 @@ A design-first, web-based visual architect for Zephyr's `zbus` message bus.
 
 - **Import parser** — extracts channels, observers, subscribers, async listeners, threads, and `ZBUS_CHAN_ADD_OBS` links from C source.
 - **Code generator** — emits `zbus_channels.h` and `zbus_observers.c` using the same macros found in real Zephyr code.
-- **Static design checks** — duplicate channels/IDs/observers, unobserved channels, orphan observers.
-- **Next.js + React Flow frontend** — import a source file and explore the channel/observer graph in the browser.
+- **Static design checks** — duplicate channels/IDs/observers, unobserved channels, orphan observers, message-flow cycles.
+- **More macro coverage** — `_WITH_ENABLE` observer variants, shadow channels, proxy agents, and proxy channel links.
+- **Next.js + React Flow frontend** — import a source file, explore the channel/observer graph, view diagnostics, and export generated code.
 - **FastAPI backend** — REST endpoints for `/import/file`, `/import/text`, `/generate`, and `/checks`.
 - **CLI** — `zbus-architect import`, `zbus-architect generate`, `zbus-architect check`.
 - **Verified build** — `build_test/` imports `samples/subsys/zbus/hello_world` and builds on `native_sim` using `zephyr-mcp-server`.
