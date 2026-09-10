@@ -89,7 +89,27 @@ npm run dev
    - Click **Check** to validate the model.
    - Click **Export** to download `zbus_messages.h`, `zbus_channels.h`, and `zbus_observers.c`.
 
-   You can also click **New** to start a blank design, then add channels, observers, threads, message types, and proxy agents.
+   - Click **Tutorial** to open a step-by-step guide and load a working example.
+   - Click **New** to start a blank design.
+   - Click **Clear** to wipe the canvas and build your own configuration from scratch.
+
+## Tutorial / example
+
+The page includes a built-in tutorial. Click **Tutorial** in the top-right to:
+
+1. Load the `hello_world` example design on the canvas.
+2. See how channels, observers, and threads are connected.
+3. Edit properties and re-run checks.
+4. Export the generated C files.
+
+You can also run the same example from the command line:
+
+```bash
+cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
+PYTHONPATH=backend .venv/bin/python -m zbus_architect.cli import fixtures/hello_world.c --pretty
+PYTHONPATH=backend .venv/bin/python -m zbus_architect.cli check fixtures/hello_world.c --pretty
+PYTHONPATH=backend .venv/bin/python -m zbus_architect.cli generate fixtures/hello_world.c -d out
+```
 
 ## West build test
 

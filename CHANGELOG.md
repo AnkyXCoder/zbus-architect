@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Unit tests for parser and checks.
 - Drag-and-drop visual editor with a component palette and property panel.
 - System-aware light/dark theme and full component names in the sidebar.
+- In-app tutorial with a loadable example and a Clear button to reset the canvas.
 - Model-driven `/checks/architecture` endpoint for validating a hand-edited architecture.
 - C struct/union extraction for message payload definitions.
 - `zbus_messages.h` generation.

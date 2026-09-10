@@ -6,6 +6,7 @@ import CheckPanel from "@/components/CheckPanel";
 import FlowCanvas from "@/components/FlowCanvas";
 import PropertyPanel from "@/components/PropertyPanel";
 import Toolbar from "@/components/Toolbar";
+import TutorialPanel from "@/components/TutorialPanel";
 import { fetchChecks, generateFiles, importProject, runChecks } from "@/lib/api";
 import { useZbusStore } from "@/store/useZbusStore";
 
@@ -21,10 +22,12 @@ function download(name: string, content: string) {
 
 export default function Home() {
     const [path, setPath] = useState("");
+    const [showTutorial, setShowTutorial] = useState(false);
     const architecture = useZbusStore((s) => s.architecture);
     const setArchitecture = useZbusStore((s) => s.setArchitecture);
     const setChecks = useZbusStore((s) => s.setChecks);
     const newArchitecture = useZbusStore((s) => s.newArchitecture);
+    const clearAll = useZbusStore((s) => s.clearAll);
     const selectedNodeId = useZbusStore((s) => s.selectedNodeId);
 
     const handleImport = async () => {
@@ -92,6 +95,12 @@ export default function Home() {
                     New
                 </button>
                 <button
+                    onClick={clearAll}
+                    className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-500"
+                >
+                    Clear
+                </button>
+                <button
                     onClick={handleCheck}
                     className="rounded bg-yellow-500 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-600"
                 >
@@ -103,6 +112,12 @@ export default function Home() {
                 >
                     Export
                 </button>
+                <button
+                    onClick={() => setShowTutorial(true)}
+                    className="ml-auto rounded bg-cyan-600 px-3 py-1 text-sm font-medium text-white hover:bg-cyan-500"
+                >
+                    Tutorial
+                </button>
             </header>
             <section className="flex flex-1 overflow-hidden">
                 <Toolbar />
@@ -113,6 +128,7 @@ export default function Home() {
                     {selectedNodeId ? <PropertyPanel /> : <CheckPanel />}
                 </aside>
             </section>
+            {showTutorial && <TutorialPanel onClose={() => setShowTutorial(false)} />}
         </main>
     );
 }

@@ -29,6 +29,7 @@ interface ZbusState {
     selectedNodeId: string | null;
     setArchitecture: (architecture: Architecture) => void;
     newArchitecture: () => void;
+    clearAll: () => void;
     setChecks: (checks: ZbusCheck[]) => void;
     setSelectedNodeId: (id: string | null) => void;
 
@@ -69,6 +70,7 @@ export const useZbusStore = create<ZbusState>((set) => ({
 
     setArchitecture: (architecture) => set({ architecture }),
     newArchitecture: () => set({ architecture: emptyArchitecture(), selectedNodeId: null }),
+    clearAll: () => set({ architecture: null, checks: [], selectedNodeId: null }),
     setChecks: (checks) => set({ checks }),
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
