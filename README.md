@@ -105,6 +105,10 @@ Once the page is open:
 
 The page includes a built-in tutorial. Click **Tutorial** in the top-right to load a complete zbus design that includes channels, listeners, subscribers, message subscribers, async listeners, threads, a proxy agent, a shadow channel, and runtime observations.
 
+![Tutorial example](docs/images/tutorial_example.svg)
+
+The example shows how zbus components are wired together: channels on the left, observers in the middle, a thread on the right, message types below the channels, and a proxy agent linking to the shadow channel.
+
 You can also run the same fixture from the command line:
 
 ```bash

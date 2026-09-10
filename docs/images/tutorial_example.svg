@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="680" viewBox="0 0 900 680" font-family="sans-serif" font-size="12">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b" />
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0ea5e9" />
+    </marker>
+  </defs>
+
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#0f172a">zbus tutorial example</text>
+  <text x="20" y="46" fill="#64748b">All macro types and connections used in the built-in tutorial</text>
+
+  <!-- Channels -->
+  <g>
+    <rect x="60" y="80" width="160" height="50" rx="6" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="140" y="102" text-anchor="middle" fill="white" font-weight="bold">version_chan</text>
+    <text x="140" y="118" text-anchor="middle" fill="#dbeafe">struct version_msg</text>
+
+    <rect x="60" y="150" width="160" height="50" rx="6" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="140" y="172" text-anchor="middle" fill="white" font-weight="bold">acc_chan</text>
+    <text x="140" y="188" text-anchor="middle" fill="#dbeafe">struct acc_msg</text>
+
+    <rect x="60" y="220" width="160" height="50" rx="6" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="140" y="242" text-anchor="middle" fill="white" font-weight="bold">simple_chan</text>
+    <text x="140" y="258" text-anchor="middle" fill="#dbeafe">int</text>
+
+    <rect x="60" y="290" width="160" height="50" rx="6" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="140" y="312" text-anchor="middle" fill="white" font-weight="bold">status_chan</text>
+    <text x="140" y="328" text-anchor="middle" fill="#dbeafe">int</text>
+
+    <rect x="60" y="360" width="160" height="50" rx="6" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="140" y="382" text-anchor="middle" fill="white" font-weight="bold">shadow_chan</text>
+    <text x="140" y="398" text-anchor="middle" fill="#dbeafe">struct sensor_msg</text>
+  </g>
+
+  <!-- Observers -->
+  <g>
+    <rect x="360" y="80" width="160" height="50" rx="6" fill="#16a34a" stroke="#15803d" stroke-width="2"/>
+    <text x="440" y="102" text-anchor="middle" fill="white" font-weight="bold">foo_lis</text>
+    <text x="440" y="118" text-anchor="middle" fill="#dcfce7">listener</text>
+
+    <rect x="360" y="150" width="160" height="50" rx="6" fill="#ca8a04" stroke="#a16207" stroke-width="2"/>
+    <text x="440" y="172" text-anchor="middle" fill="white" font-weight="bold">bar_sub</text>
+    <text x="440" y="188" text-anchor="middle" fill="#fef9c3">subscriber</text>
+
+    <rect x="360" y="220" width="160" height="50" rx="6" fill="#9333ea" stroke="#7e22ce" stroke-width="2"/>
+    <text x="440" y="242" text-anchor="middle" fill="white" font-weight="bold">msg_sub</text>
+    <text x="440" y="258" text-anchor="middle" fill="#f3e8ff">msg_subscriber</text>
+
+    <rect x="360" y="290" width="160" height="50" rx="6" fill="#db2777" stroke="#be185d" stroke-width="2"/>
+    <text x="440" y="312" text-anchor="middle" fill="white" font-weight="bold">baz_async_lis</text>
+    <text x="440" y="328" text-anchor="middle" fill="#fce7f3">async_listener</text>
+
+    <rect x="360" y="360" width="160" height="50" rx="6" fill="#16a34a" stroke="#15803d" stroke-width="2"/>
+    <text x="440" y="382" text-anchor="middle" fill="white" font-weight="bold">proxy0_listener</text>
+    <text x="440" y="398" text-anchor="middle" fill="#dcfce7">listener</text>
+  </g>
+
+  <!-- Thread -->
+  <g>
+    <rect x="660" y="150" width="160" height="50" rx="6" fill="#ea580c" stroke="#c2410c" stroke-width="2"/>
+    <text x="740" y="172" text-anchor="middle" fill="white" font-weight="bold">subscriber_task_id</text>
+    <text x="740" y="188" text-anchor="middle" fill="#fed7aa">subscriber_task</text>
+  </g>
+
+  <!-- Proxy -->
+  <g>
+    <rect x="360" y="500" width="160" height="50" rx="6" fill="#0891b2" stroke="#0e7490" stroke-width="2"/>
+    <text x="440" y="522" text-anchor="middle" fill="white" font-weight="bold">proxy0</text>
+    <text x="440" y="538" text-anchor="middle" fill="#cffafe">ZBUS_PROXY_AGENT_BACKEND_IPC</text>
+  </g>
+
+  <!-- Messages -->
+  <g>
+    <rect x="60" y="500" width="160" height="50" rx="6" fill="#475569" stroke="#334155" stroke-width="2"/>
+    <text x="140" y="522" text-anchor="middle" fill="white" font-weight="bold">version_msg</text>
+    <text x="140" y="538" text-anchor="middle" fill="#e2e8f0">major/minor/build</text>
+
+    <rect x="60" y="570" width="160" height="50" rx="6" fill="#475569" stroke="#334155" stroke-width="2"/>
+    <text x="140" y="592" text-anchor="middle" fill="white" font-weight="bold">acc_msg</text>
+    <text x="140" y="608" text-anchor="middle" fill="#e2e8f0">x/y/z</text>
+
+    <rect x="60" y="640" width="160" height="50" rx="6" fill="#475569" stroke="#334155" stroke-width="2"/>
+    <text x="140" y="662" text-anchor="middle" fill="white" font-weight="bold">sensor_msg</text>
+    <text x="140" y="678" text-anchor="middle" fill="#e2e8f0">value</text>
+  </g>
+
+  <!-- Edges -->
+  <g stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <path d="M220 105 C 290 105, 290 105, 360 105"/>
+    <path d="M220 175 C 290 175, 290 175, 360 175"/>
+    <path d="M220 175 C 290 175, 290 105, 360 105"/>
+    <path d="M220 245 C 290 245, 290 105, 360 105"/>
+    <path d="M220 315 C 290 315, 290 105, 360 105" stroke-dasharray="5 5"/>
+    <path d="M220 245 C 290 245, 290 175, 360 175"/>
+    <path d="M220 105 C 290 105, 290 175, 360 175"/>
+    <path d="M220 105 C 290 105, 290 245, 360 245"/>
+    <path d="M220 105 C 290 105, 290 315, 360 315"/>
+    <path d="M220 175 C 290 175, 290 385, 360 385" stroke-dasharray="5 5"/>
+    <path d="M220 245 C 290 245, 290 385, 360 385" stroke-dasharray="5 5"/>
+    <path d="M440 525 C 300 525, 300 385, 220 385" stroke-dasharray="2 2"/>
+  </g>
+
+  <!-- Labels on edges -->
+  <g fill="#0ea5e9" font-size="11">
+    <text x="280" y="95">data: struct version_msg</text>
+    <text x="280" y="165">data: struct acc_msg</text>
+    <text x="280" y="235">data: int</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(620, 460)">
+    <rect width="240" height="150" rx="6" fill="white" stroke="#cbd5e1"/>
+    <text x="12" y="20" font-weight="bold" fill="#0f172a">Legend</text>
+    <rect x="12" y="30" width="12" height="12" rx="3" fill="#2563eb"/>
+    <text x="30" y="40" fill="#0f172a">Channel</text>
+    <rect x="12" y="50" width="12" height="12" rx="3" fill="#16a34a"/>
+    <text x="30" y="60" fill="#0f172a">Listener / Subscriber</text>
+    <rect x="12" y="70" width="12" height="12" rx="3" fill="#ca8a04"/>
+    <text x="30" y="80" fill="#0f172a">Msg Subscriber</text>
+    <rect x="12" y="90" width="12" height="12" rx="3" fill="#db2777"/>
+    <text x="30" y="100" fill="#0f172a">Async Listener</text>
+    <rect x="12" y="110" width="12" height="12" rx="3" fill="#ea580c"/>
+    <text x="30" y="120" fill="#0f172a">Thread</text>
+    <rect x="12" y="130" width="12" height="12" rx="3" fill="#475569"/>
+    <text x="30" y="140" fill="#0f172a">Message Type</text>
+    <rect x="12" y="150" width="12" height="12" rx="3" fill="#0891b2"/>
+    <text x="30" y="160" fill="#0f172a">Proxy Agent</text>
+  </g>
+</svg>
