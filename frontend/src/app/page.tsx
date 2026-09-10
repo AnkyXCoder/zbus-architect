@@ -23,6 +23,8 @@ function download(name: string, content: string) {
 export default function Home() {
     const [path, setPath] = useState("");
     const [showTutorial, setShowTutorial] = useState(false);
+    const [paneWidth, setPaneWidth] = useState(320);
+    const [isResizing, setIsResizing] = useState(false);
     const architecture = useZbusStore((s) => s.architecture);
     const setArchitecture = useZbusStore((s) => s.setArchitecture);
     const setChecks = useZbusStore((s) => s.setChecks);
@@ -51,6 +53,21 @@ export default function Home() {
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
     }, [undo, redo]);
+
+    useEffect(() => {
+        if (!isResizing) return;
+        const onMove = (e: MouseEvent) => {
+            const next = window.innerWidth - e.clientX;
+            setPaneWidth(Math.min(600, Math.max(240, next)));
+        };
+        const onUp = () => setIsResizing(false);
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+        return () => {
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+        };
+    }, [isResizing]);
 
     const handleImport = async () => {
         try {
@@ -160,7 +177,14 @@ export default function Home() {
                 <div className="flex-1">
                     <FlowCanvas />
                 </div>
-                <aside className="w-80 border-l border-slate-300 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
+                <div
+                    onMouseDown={() => setIsResizing(true)}
+                    className="w-1 cursor-col-resize bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600"
+                />
+                <aside
+                    style={{ width: paneWidth }}
+                    className="border-l border-slate-300 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"
+                >
                     {selectedNodeId ? <PropertyPanel /> : <CheckPanel />}
                 </aside>
             </section>

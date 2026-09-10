@@ -95,6 +95,7 @@ Once the page is open:
 - Click **Undo** or **Redo** (or press `Ctrl+Z` / `Ctrl+Shift+Z`) to step through your edits.
 - Click **Simulate publish** on a channel to see animated data-flow arrows and the message type being passed.
 - A **Legend** in the top-left explains node colors and edge styles.
+- The right pane is resizable; drag the thin border between the canvas and the pane to change its width.
 - Select a **Message Type** node to configure its fields (name, type, array size) and see the generated C struct.
 - Click **Check** to validate the model.
 - Click **Export** to download `zbus_messages.h`, `zbus_channels.h`, and `zbus_observers.c`.

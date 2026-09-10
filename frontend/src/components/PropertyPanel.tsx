@@ -473,8 +473,42 @@ export default function PropertyPanel() {
     const [prefix, ...rest] = selectedNodeId.split("-");
     const name = rest.join("-");
 
+    let typeLabel = "";
+    let typeColor = "bg-slate-600";
+    if (prefix === "ch") {
+        typeLabel = "Channel";
+        typeColor = "bg-blue-600";
+    } else if (prefix === "obs") {
+        const obs = architecture.observers.find((o) => o.name === name);
+        const kind = obs?.kind || "observer";
+        typeLabel = `Observer (${kind})`;
+        typeColor =
+            kind === "subscriber"
+                ? "bg-yellow-600"
+                : kind === "msg_subscriber"
+                    ? "bg-purple-600"
+                    : kind === "async_listener"
+                        ? "bg-pink-600"
+                        : "bg-green-600";
+    } else if (prefix === "thr") {
+        typeLabel = "Thread";
+        typeColor = "bg-orange-600";
+    } else if (prefix === "msg") {
+        typeLabel = "Message Type";
+        typeColor = "bg-slate-600";
+    } else if (prefix === "prx") {
+        typeLabel = "Proxy Agent";
+        typeColor = "bg-cyan-600";
+    }
+
     return (
         <div className="h-full overflow-y-auto overflow-x-hidden border-l border-slate-300 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2 border-b border-slate-300 p-2 dark:border-slate-700">
+                <span className={`h-3 w-3 rounded ${typeColor}`} />
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    {typeLabel}
+                </span>
+            </div>
             {prefix === "ch" && (
                 <ChannelForm
                     architecture={architecture}

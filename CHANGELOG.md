@@ -33,6 +33,8 @@ All notable changes to this project will be documented in this file.
 - Custom node types with color coding, subtitles, and on-demand connection dots (Connect button toggles them; they hide after connecting).
 - Undo/redo support with Ctrl+Z / Ctrl+Shift+Z and toolbar buttons.
 - Custom animated edge with a moving dot and arrowhead during publish simulation.
+- Resizable right pane with a drag handle.
+- Node-type color badge at the top of the property panel.
 - Message-type nodes show no connection dots.
 - Message field editor in the property panel (name, type, array size) that regenerates the C struct definition.
 - Improved edge styling with smoothstep lines and arrowheads.
