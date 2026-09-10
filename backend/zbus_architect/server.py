@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -73,5 +75,6 @@ def generate(payload: GeneratePayload) -> dict:
 
 @app.post("/checks")
 def checks(payload: ImportPath) -> list[Check]:
-    arch = parse_file(payload.path)
-    return run_checks(arch)
+    source = Path(payload.path).read_text(encoding="utf-8")
+    arch = parse_source(source)
+    return run_checks(arch, source)

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel
 
-from .model import Architecture
+from .model import Architecture, Channel
+from .parser import remove_c_comments
+from .struct_parser import _extract_braced
 
 Severity = Literal["error", "warning", "info"]
 
@@ -40,7 +43,100 @@ def _referenced_observers(arch: Architecture) -> set[str]:
     return names
 
 
-def run_checks(arch: Architecture) -> list[Check]:
+def _extract_function_bodies(source: str) -> dict[str, str]:
+    text = remove_c_comments(source)
+    pattern = re.compile(
+        r"^\s*(?:static\s+)?(?:void|int|bool|size_t|uint\d+_t)\s+(\w+)\s*\([^)]*\)\s*\{",
+        re.MULTILINE,
+    )
+    bodies: dict[str, str] = {}
+    for m in pattern.finditer(text):
+        name = m.group(1)
+        open_idx = m.end() - 1
+        try:
+            body = _extract_braced(text, open_idx)
+        except ValueError:
+            continue
+        bodies[name] = body
+    return bodies
+
+
+def _find_publishes(body: str) -> list[str]:
+    targets: list[str] = []
+    for pattern in (
+        r"\bzbus_chan_pub\s*\(\s*&?(\w+)",
+        r"\bzbus_chan_notify\s*\(\s*&?(\w+)",
+    ):
+        for m in re.finditer(pattern, body):
+            targets.append(m.group(1))
+    return targets
+
+
+def _channel_to_targets(
+    arch: Architecture, bodies: dict[str, str]
+) -> dict[str, list[str]]:
+    observer_callbacks = {
+        o.name: o.callback for o in arch.observers if o.callback}
+    obs_by_channel: dict[str, list[str]] = {}
+    for ch in arch.channels:
+        obs_by_channel.setdefault(ch.name, []).extend(ch.observers)
+    for obs in arch.add_observations:
+        obs_by_channel.setdefault(obs.channel, []).append(obs.observer)
+
+    graph: dict[str, list[str]] = {}
+    for ch in arch.channels:
+        targets: set[str] = set()
+        for obs_name in obs_by_channel.get(ch.name, []):
+            cb = observer_callbacks.get(obs_name)
+            if cb and cb in bodies:
+                targets.update(_find_publishes(bodies[cb]))
+        if targets:
+            graph[ch.name] = sorted(targets)
+    return graph
+
+
+def _find_cycle_from(
+    start: str, graph: dict[str, list[str]]
+) -> list[str] | None:
+    stack = [start]
+    seen: set[str] = {start}
+    while stack:
+        node = stack[-1]
+        for nxt in graph.get(node, []):
+            if nxt == start:
+                return stack + [nxt]
+            if nxt not in seen:
+                seen.add(nxt)
+                stack.append(nxt)
+                break
+        else:
+            stack.pop()
+    return None
+
+
+def detect_cycles(arch: Architecture, source: str) -> list[Check]:
+    if not arch.channels or not source.strip():
+        return []
+    bodies = _extract_function_bodies(source)
+    graph = _channel_to_targets(arch, bodies)
+    checks: list[Check] = []
+    for ch in arch.channels:
+        if ch.name not in graph:
+            continue
+        cycle = _find_cycle_from(ch.name, graph)
+        if cycle:
+            checks.append(
+                Check(
+                    id="cycle-detected",
+                    severity="error",
+                    message=f"Cycle in message flow: {' -> '.join(cycle)}",
+                    channel=ch.name,
+                )
+            )
+    return checks
+
+
+def run_checks(arch: Architecture, source: str = "") -> list[Check]:
     checks: list[Check] = []
     channel_names: dict[str, int] = {}
     channel_ids: dict[int, list[str]] = {}
@@ -131,5 +227,8 @@ def run_checks(arch: Architecture) -> list[Check]:
                     thread=th.name,
                 )
             )
+
+    if source:
+        checks.extend(detect_cycles(arch, source))
 
     return checks

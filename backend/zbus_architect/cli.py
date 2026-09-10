@@ -60,8 +60,9 @@ def generate(path: Path, out_dir: Path) -> None:
 @click.argument("path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option("--pretty", is_flag=True)
 def check(path: Path, pretty: bool) -> None:
-    arch = parse_file(path)
-    results = run_checks(arch)
+    source = path.read_text(encoding="utf-8")
+    arch = parse_source(source)
+    results = run_checks(arch, source)
     data = [c.model_dump() for c in results]
     click.echo(json.dumps(data, indent=2 if pretty else None))
 
