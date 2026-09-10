@@ -8,7 +8,6 @@ import PropertyPanel from "@/components/PropertyPanel";
 import Toolbar from "@/components/Toolbar";
 import { fetchChecks, generateFiles, importProject, runChecks } from "@/lib/api";
 import { useZbusStore } from "@/store/useZbusStore";
-import type { Architecture } from "@/lib/types";
 
 function download(name: string, content: string) {
     const blob = new Blob([content], { type: "text/plain" });
@@ -71,36 +70,36 @@ export default function Home() {
 
     return (
         <main className="flex h-screen flex-col">
-            <header className="flex items-center gap-4 border-b border-slate-800 bg-slate-900 p-4">
+            <header className="flex items-center gap-4 border-b border-slate-300 bg-slate-100 p-4 dark:border-slate-800 dark:bg-slate-900">
                 <h1 className="text-lg font-semibold">zbus-architect</h1>
                 <input
                     type="text"
                     value={path}
                     onChange={(e) => setPath(e.target.value)}
                     placeholder="/path/to/fixtures/hello_world.c"
-                    className="rounded bg-slate-800 px-2 py-1 text-sm"
+                    className="rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700"
                 />
                 <button
                     onClick={handleImport}
-                    className="rounded bg-blue-600 px-3 py-1 text-sm font-medium hover:bg-blue-500"
+                    className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-500"
                 >
                     Import
                 </button>
                 <button
                     onClick={newArchitecture}
-                    className="rounded bg-slate-600 px-3 py-1 text-sm font-medium hover:bg-slate-500"
+                    className="rounded bg-slate-500 px-3 py-1 text-sm font-medium text-white hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500"
                 >
                     New
                 </button>
                 <button
                     onClick={handleCheck}
-                    className="rounded bg-yellow-600 px-3 py-1 text-sm font-medium hover:bg-yellow-500"
+                    className="rounded bg-yellow-500 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-600"
                 >
                     Check
                 </button>
                 <button
                     onClick={handleExport}
-                    className="rounded bg-green-600 px-3 py-1 text-sm font-medium hover:bg-green-500"
+                    className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-500"
                 >
                     Export
                 </button>
@@ -110,7 +109,7 @@ export default function Home() {
                 <div className="flex-1">
                     <FlowCanvas />
                 </div>
-                <aside className="w-80 border-l border-slate-800 bg-slate-900">
+                <aside className="w-80 border-l border-slate-300 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
                     {selectedNodeId ? <PropertyPanel /> : <CheckPanel />}
                 </aside>
             </section>

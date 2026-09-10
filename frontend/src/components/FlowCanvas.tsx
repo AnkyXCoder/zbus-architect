@@ -10,10 +10,17 @@ import {
     useEdgesState,
     useNodesState,
     useReactFlow,
+    type ColorMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import { useZbusStore } from "@/store/useZbusStore";
+
+const NODE_STYLE = {
+    minWidth: 120,
+    padding: 8,
+    fontSize: 13,
+};
 
 function CanvasInner() {
     const architecture = useZbusStore((s) => s.architecture);
@@ -52,6 +59,7 @@ function CanvasInner() {
                 type: "channel",
                 position: makePos(`ch-${ch.name}`, { x: 100, y: idx * 140 }),
                 data: { label: ch.name, ...ch },
+                style: NODE_STYLE,
             });
         });
 
@@ -61,6 +69,7 @@ function CanvasInner() {
                 type: "observer",
                 position: makePos(`obs-${obs.name}`, { x: 500, y: idx * 140 }),
                 data: { label: obs.name, ...obs },
+                style: NODE_STYLE,
             });
         });
 
@@ -70,6 +79,7 @@ function CanvasInner() {
                 type: "thread",
                 position: makePos(`thr-${th.name}`, { x: 900, y: idx * 140 }),
                 data: { label: th.name, ...th },
+                style: NODE_STYLE,
             });
         });
 
@@ -79,6 +89,7 @@ function CanvasInner() {
                 type: "message",
                 position: makePos(`msg-${m.name}`, { x: 100, y: 400 + idx * 140 }),
                 data: { label: m.name, ...m },
+                style: NODE_STYLE,
             });
         });
 
@@ -88,6 +99,7 @@ function CanvasInner() {
                 type: "proxy",
                 position: makePos(`prx-${a.name}`, { x: 500, y: 400 + idx * 140 }),
                 data: { label: a.name, ...a },
+                style: NODE_STYLE,
             });
         });
 
@@ -216,6 +228,7 @@ function CanvasInner() {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeClick={onNodeClick}
+                colorMode={"system" as ColorMode}
                 fitView
             >
                 <Background />

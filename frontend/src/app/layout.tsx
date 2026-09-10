@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "zbus-architect",
-  description: "Visual design tool for Zephyr zbus",
+    title: "zbus-architect",
+    description: "Visual design tool for Zephyr zbus",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body className="bg-slate-950 text-slate-100">{children}</body>
-    </html>
-  );
+    return (
+        <html lang="en">
+            <body className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+                {children}
+            </body>
+        </html>
+    );
 }
