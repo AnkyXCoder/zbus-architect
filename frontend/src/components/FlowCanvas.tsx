@@ -6,6 +6,7 @@ import {
     Connection,
     Controls,
     MarkerType,
+    Panel,
     ReactFlow,
     ReactFlowProvider,
     useEdgesState,
@@ -16,12 +17,43 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import { useZbusStore } from "@/store/useZbusStore";
+import ZbusNode from "@/components/ZbusNode";
+
+const nodeTypes = {
+    channel: ZbusNode,
+    observer: ZbusNode,
+    thread: ZbusNode,
+    message: ZbusNode,
+    proxy: ZbusNode,
+};
 
 const NODE_STYLE = {
-    minWidth: 120,
-    padding: 8,
+    minWidth: 140,
     fontSize: 13,
 };
+
+function Legend() {
+    return (
+        <Panel
+            position="top-left"
+            className="rounded border border-slate-300 bg-white/90 p-3 text-xs text-slate-700 shadow dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-300"
+        >
+            <div className="mb-2 font-semibold">Legend</div>
+            <div className="space-y-1">
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-blue-600" /> Channel</div>
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-green-600" /> Listener / Subscriber</div>
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-yellow-600" /> Msg Subscriber</div>
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-pink-600" /> Async Listener</div>
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-orange-600" /> Thread</div>
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-slate-600" /> Message Type</div>
+                <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-cyan-600" /> Proxy Agent</div>
+                <div className="flex items-center gap-2"><span className="h-px w-6 bg-slate-500" /> Direct link</div>
+                <div className="flex items-center gap-2"><span className="h-px w-6 border-t border-dashed border-slate-500" /> Runtime observation</div>
+                <div className="flex items-center gap-2"><span className="h-px w-6 border-t border-dotted border-slate-500" /> Proxy → shadow</div>
+            </div>
+        </Panel>
+    );
+}
 
 function CanvasInner() {
     const architecture = useZbusStore((s) => s.architecture);
@@ -33,6 +65,7 @@ function CanvasInner() {
     const addProxyAgent = useZbusStore((s) => s.addProxyAgent);
     const addObservation = useZbusStore((s) => s.addObservation);
     const setSelectedNodeId = useZbusStore((s) => s.setSelectedNodeId);
+    const updateChannel = useZbusStore((s) => s.updateChannel);
 
     const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
@@ -55,11 +88,19 @@ function CanvasInner() {
         const makePos = (id: string, fallback: { x: number; y: number }) =>
             positions[id] || fallback;
 
+        const CHANNEL_X = 80;
+        const OBSERVER_X = 400;
+        const THREAD_X = 720;
+        const PROXY_X = 400;
+        const MESSAGE_X = 80;
+        const SECONDARY_Y = 680;
+        const Y_STEP = 130;
+
         (arch.channels || []).forEach((ch: any, idx: number) => {
             newNodes.push({
                 id: `ch-${ch.name}`,
                 type: "channel",
-                position: makePos(`ch-${ch.name}`, { x: 100, y: idx * 140 }),
+                position: makePos(`ch-${ch.name}`, { x: CHANNEL_X, y: idx * Y_STEP }),
                 data: { label: ch.name, ...ch },
                 style: NODE_STYLE,
             });
@@ -69,7 +110,7 @@ function CanvasInner() {
             newNodes.push({
                 id: `obs-${obs.name}`,
                 type: "observer",
-                position: makePos(`obs-${obs.name}`, { x: 500, y: idx * 140 }),
+                position: makePos(`obs-${obs.name}`, { x: OBSERVER_X, y: idx * Y_STEP }),
                 data: { label: obs.name, ...obs },
                 style: NODE_STYLE,
             });
@@ -79,7 +120,7 @@ function CanvasInner() {
             newNodes.push({
                 id: `thr-${th.name}`,
                 type: "thread",
-                position: makePos(`thr-${th.name}`, { x: 900, y: idx * 140 }),
+                position: makePos(`thr-${th.name}`, { x: THREAD_X, y: idx * Y_STEP }),
                 data: { label: th.name, ...th },
                 style: NODE_STYLE,
             });
@@ -89,7 +130,7 @@ function CanvasInner() {
             newNodes.push({
                 id: `msg-${m.name}`,
                 type: "message",
-                position: makePos(`msg-${m.name}`, { x: 100, y: 400 + idx * 140 }),
+                position: makePos(`msg-${m.name}`, { x: MESSAGE_X, y: SECONDARY_Y + idx * Y_STEP }),
                 data: { label: m.name, ...m },
                 style: NODE_STYLE,
             });
@@ -99,7 +140,7 @@ function CanvasInner() {
             newNodes.push({
                 id: `prx-${a.name}`,
                 type: "proxy",
-                position: makePos(`prx-${a.name}`, { x: 500, y: 400 + idx * 140 }),
+                position: makePos(`prx-${a.name}`, { x: PROXY_X, y: SECONDARY_Y + idx * Y_STEP }),
                 data: { label: a.name, ...a },
                 style: NODE_STYLE,
             });
@@ -107,35 +148,85 @@ function CanvasInner() {
 
         const newEdges: any[] = [];
         const edgeIds = new Set<string>();
+        const channelMap = Object.fromEntries(
+            (arch.channels || []).map((c: any) => [c.name, c])
+        );
 
-        const addEdge = (id: string, source: string, target: string, style?: any, label?: string) => {
+        const pushEdge = (
+            id: string,
+            source: string,
+            target: string,
+            opts: {
+                animated?: boolean;
+                dashed?: boolean;
+                label?: string;
+            } = {}
+        ) => {
             if (edgeIds.has(id)) return;
             edgeIds.add(id);
             newEdges.push({
                 id,
                 source,
                 target,
-                label,
-                animated: simulatingChannels.has(source.replace("ch-", "")) || simulatingChannels.has(source.replace("prx-", "")),
+                label: opts.label,
+                animated: !!opts.animated,
                 markerEnd: { type: MarkerType.Arrow },
-                style: { strokeWidth: 2, ...style },
+                style: {
+                    strokeWidth: opts.animated ? 3 : 2,
+                    strokeDasharray: opts.dashed ? "5 5" : undefined,
+                    stroke: opts.animated ? "#0ea5e9" : undefined,
+                },
             });
         };
 
         (arch.channels || []).forEach((ch: any) => {
             (ch.observers || []).forEach((obsName: string) => {
-                addEdge(`${ch.name}-${obsName}`, `ch-${ch.name}`, `obs-${obsName}`);
+                const simulating = simulatingChannels.has(ch.name);
+                pushEdge(
+                    `${ch.name}-${obsName}`,
+                    `ch-${ch.name}`,
+                    `obs-${obsName}`,
+                    {
+                        animated: simulating,
+                        label: simulating ? `data: ${ch.message_type}` : undefined,
+                    }
+                );
             });
         });
 
         (arch.add_observations || []).forEach((obs: any) => {
-            const targetId = `obs-${obs.observer}`;
-            addEdge(`add-${obs.channel}-${obs.observer}`, `ch-${obs.channel}`, targetId, { strokeDasharray: "5 5" });
+            const ch = channelMap[obs.channel];
+            const simulating = simulatingChannels.has(obs.channel);
+            pushEdge(
+                `add-${obs.channel}-${obs.observer}`,
+                `ch-${obs.channel}`,
+                `obs-${obs.observer}`,
+                {
+                    animated: simulating,
+                    dashed: true,
+                    label: simulating
+                        ? `data: ${ch?.message_type || "?"} (runtime)`
+                        : undefined,
+                }
+            );
         });
 
         (arch.channels || []).forEach((ch: any) => {
             if (ch.proxy_agent) {
-                addEdge(`proxy-${ch.proxy_agent}-${ch.name}`, `prx-${ch.proxy_agent}`, `ch-${ch.name}`, { strokeDasharray: "2 2" }, "shadow");
+                const simulating =
+                    simulatingChannels.has(ch.name) || simulatingChannels.has(ch.proxy_agent);
+                pushEdge(
+                    `proxy-${ch.proxy_agent}-${ch.name}`,
+                    `prx-${ch.proxy_agent}`,
+                    `ch-${ch.name}`,
+                    {
+                        animated: simulating,
+                        dashed: true,
+                        label: simulating
+                            ? `data: ${ch.message_type} (shadow)`
+                            : undefined,
+                    }
+                );
             }
         });
 
@@ -146,14 +237,22 @@ function CanvasInner() {
     const onConnect = useCallback(
         (connection: Connection) => {
             if (!connection.source || !connection.target) return;
-            if (!connection.source.startsWith("ch-")) return;
-            const chName = connection.source.slice(3);
-            const obsName = connection.target.startsWith("obs-")
-                ? connection.target.slice(4)
-                : connection.target;
-            addObservation(chName, obsName);
+
+            if (connection.source.startsWith("ch-") && connection.target.startsWith("obs-")) {
+                const chName = connection.source.slice(3);
+                const obsName = connection.target.slice(4);
+                addObservation(chName, obsName);
+            } else if (connection.source.startsWith("prx-") && connection.target.startsWith("ch-")) {
+                const proxyName = connection.source.slice(4);
+                const chName = connection.target.slice(3);
+                const arch = architecture as any;
+                const ch = arch?.channels?.find((c: any) => c.name === chName);
+                if (ch) {
+                    updateChannel(chName, { ...ch, proxy_agent: proxyName });
+                }
+            }
         },
-        [addObservation]
+        [addObservation, architecture, updateChannel]
     );
 
     const onNodeClick = useCallback(
@@ -253,11 +352,13 @@ function CanvasInner() {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeClick={onNodeClick}
+                nodeTypes={nodeTypes}
                 colorMode={"system" as ColorMode}
                 fitView
             >
                 <Background />
                 <Controls />
+                <Legend />
             </ReactFlow>
         </div>
     );
