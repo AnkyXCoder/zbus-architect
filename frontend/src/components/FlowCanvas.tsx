@@ -17,6 +17,7 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import { useZbusStore } from "@/store/useZbusStore";
+import AnimatedEdge from "@/components/AnimatedEdge";
 import ZbusNode from "@/components/ZbusNode";
 
 const nodeTypes = {
@@ -25,6 +26,10 @@ const nodeTypes = {
     thread: ZbusNode,
     message: ZbusNode,
     proxy: ZbusNode,
+};
+
+const edgeTypes = {
+    animated: AnimatedEdge,
 };
 
 const NODE_STYLE = {
@@ -169,7 +174,8 @@ function CanvasInner() {
                 id,
                 source,
                 target,
-                label: opts.label,
+                type: opts.animated ? "animated" : undefined,
+                data: { label: opts.label },
                 animated: !!opts.animated,
                 markerEnd: { type: MarkerType.Arrow },
                 style: {
@@ -356,6 +362,7 @@ function CanvasInner() {
                 onConnect={onConnect}
                 onNodeClick={onNodeClick}
                 nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
                 colorMode={"system" as ColorMode}
                 fitView
             >
