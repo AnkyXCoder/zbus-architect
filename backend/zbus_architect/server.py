@@ -78,3 +78,8 @@ def checks(payload: ImportPath) -> list[Check]:
     source = Path(payload.path).read_text(encoding="utf-8")
     arch = parse_source(source)
     return run_checks(arch, source)
+
+
+@app.post("/checks/architecture")
+def checks_architecture(payload: Architecture) -> list[Check]:
+    return run_checks(payload)

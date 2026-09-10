@@ -25,6 +25,8 @@ All notable changes to this project will be documented in this file.
 - `build_test/` app that imports `os/zephyr/samples/subsys/zbus/hello_world` and builds on `native_sim` using `zephyr-mcp-server`.
 - Static design checks: duplicate channel names, duplicate channel IDs, duplicate observer names, unobserved channels, orphan observers.
 - Unit tests for parser and checks.
+- Drag-and-drop visual editor with a component palette and property panel.
+- Model-driven `/checks/architecture` endpoint for validating a hand-edited architecture.
 - C struct/union extraction for message payload definitions.
 - `zbus_messages.h` generation.
 - Parse `_WITH_ENABLE` observer variants, `ZBUS_SHADOW_CHAN_DEFINE`, `ZBUS_PROXY_AGENT_DEFINE`, and `ZBUS_PROXY_ADD_CHAN`.

@@ -228,6 +228,36 @@ def run_checks(arch: Architecture, source: str = "") -> list[Check]:
                 )
             )
 
+    # Message type validation
+    builtins = {
+        "int", "bool", "char", "float", "double", "long", "short",
+        "size_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t",
+        "int8_t", "int16_t", "int32_t", "int64_t",
+    }
+    message_names = {m.name for m in arch.messages}
+    for ch in arch.channels:
+        mt = (ch.message_type or "").strip()
+        if mt.startswith("struct "):
+            name = mt.split(None, 1)[1].strip()
+            if name not in message_names:
+                checks.append(
+                    Check(
+                        id="unknown-message-type",
+                        severity="error",
+                        message=f"Channel {ch.name!r} references unknown message type {name!r}.",
+                        channel=ch.name,
+                    )
+                )
+        elif mt not in builtins:
+            checks.append(
+                Check(
+                    id="unknown-message-type",
+                    severity="warning",
+                    message=f"Channel {ch.name!r} uses an unrecognised message type {mt!r}.",
+                    channel=ch.name,
+                )
+            )
+
     if source:
         checks.extend(detect_cycles(arch, source))
 

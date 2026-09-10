@@ -10,7 +10,7 @@ A design-first, web-based visual architect for Zephyr's `zbus` message bus.
 - **Code generator** — emits `zbus_channels.h` and `zbus_observers.c` using the same macros found in real Zephyr code.
 - **Static design checks** — duplicate channels/IDs/observers, unobserved channels, orphan observers, message-flow cycles.
 - **More macro coverage** — `_WITH_ENABLE` observer variants, shadow channels, proxy agents, and proxy channel links.
-- **Next.js + React Flow frontend** — import a source file, explore the channel/observer graph, view diagnostics, and export generated code.
+- **Next.js + React Flow frontend** — drag and drop zbus components, connect them, edit properties, run checks, and export generated code.
 - **FastAPI backend** — REST endpoints for `/import/file`, `/import/text`, `/generate`, and `/checks`.
 - **CLI** — `zbus-architect import`, `zbus-architect generate`, `zbus-architect check`.
 - **Verified build** — `build_test/` imports `samples/subsys/zbus/hello_world` and builds on `native_sim` using `zephyr-mcp-server`.
@@ -34,7 +34,7 @@ A design-first, web-based visual architect for Zephyr's `zbus` message bus.
 cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
 
 # Python backend
-python -m venv .venv
+python3.14 -m venv .venv
 .venv/bin/pip install -e .[test]
 
 # Next.js frontend
@@ -82,10 +82,14 @@ npm run dev
 
 4. Enter an absolute C source path (for example `/home/ankit/Workspaces/fwProjects/iNode/os/zephyr/samples/subsys/zbus/hello_world/src/main.c`) and click **Import**.
 
-5. The page shows:
-   - A **React Flow graph** of channels, observers, and threads on the left.
-   - A **CheckPanel** on the right with duplicate, unobserved, orphan, and cycle diagnostics.
-   - An **Export** button to download `zbus_channels.h`, `zbus_observers.c`, and `zbus_messages.h`.
+5. Use the page:
+   - Drag components from the **Toolbar** onto the canvas.
+   - Click a node to edit its properties in the right panel.
+   - Drag from the right side of a channel to the left side of an observer to connect them.
+   - Click **Check** to validate the model.
+   - Click **Export** to download `zbus_messages.h`, `zbus_channels.h`, and `zbus_observers.c`.
+
+   You can also click **New** to start a blank design, then add channels, observers, threads, message types, and proxy agents.
 
 ## West build test
 

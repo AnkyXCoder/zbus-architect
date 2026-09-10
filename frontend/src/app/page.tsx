@@ -4,8 +4,11 @@ import { useState } from "react";
 
 import CheckPanel from "@/components/CheckPanel";
 import FlowCanvas from "@/components/FlowCanvas";
-import { fetchChecks, generateFiles, importProject } from "@/lib/api";
+import PropertyPanel from "@/components/PropertyPanel";
+import Toolbar from "@/components/Toolbar";
+import { fetchChecks, generateFiles, importProject, runChecks } from "@/lib/api";
 import { useZbusStore } from "@/store/useZbusStore";
+import type { Architecture } from "@/lib/types";
 
 function download(name: string, content: string) {
     const blob = new Blob([content], { type: "text/plain" });
@@ -22,6 +25,8 @@ export default function Home() {
     const architecture = useZbusStore((s) => s.architecture);
     const setArchitecture = useZbusStore((s) => s.setArchitecture);
     const setChecks = useZbusStore((s) => s.setChecks);
+    const newArchitecture = useZbusStore((s) => s.newArchitecture);
+    const selectedNodeId = useZbusStore((s) => s.selectedNodeId);
 
     const handleImport = async () => {
         try {
@@ -36,9 +41,22 @@ export default function Home() {
         }
     };
 
+    const handleCheck = async () => {
+        if (!architecture) {
+            alert("Create or import an architecture first");
+            return;
+        }
+        try {
+            const checks = await runChecks(architecture);
+            setChecks(checks);
+        } catch (err: any) {
+            alert(err.message || "Check failed");
+        }
+    };
+
     const handleExport = async () => {
         if (!architecture) {
-            alert("Import a project first");
+            alert("Create or import an architecture first");
             return;
         }
         try {
@@ -69,6 +87,18 @@ export default function Home() {
                     Import
                 </button>
                 <button
+                    onClick={newArchitecture}
+                    className="rounded bg-slate-600 px-3 py-1 text-sm font-medium hover:bg-slate-500"
+                >
+                    New
+                </button>
+                <button
+                    onClick={handleCheck}
+                    className="rounded bg-yellow-600 px-3 py-1 text-sm font-medium hover:bg-yellow-500"
+                >
+                    Check
+                </button>
+                <button
                     onClick={handleExport}
                     className="rounded bg-green-600 px-3 py-1 text-sm font-medium hover:bg-green-500"
                 >
@@ -76,11 +106,12 @@ export default function Home() {
                 </button>
             </header>
             <section className="flex flex-1 overflow-hidden">
+                <Toolbar />
                 <div className="flex-1">
                     <FlowCanvas />
                 </div>
                 <aside className="w-80 border-l border-slate-800 bg-slate-900">
-                    <CheckPanel />
+                    {selectedNodeId ? <PropertyPanel /> : <CheckPanel />}
                 </aside>
             </section>
         </main>
