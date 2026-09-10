@@ -64,21 +64,27 @@ PYTHONPATH=backend .venv/bin/python -m pytest backend/tests
 
 ### Webpage
 
-1. Start the backend API server:
+The root `package.json` uses `concurrently` to run both the FastAPI backend and the Next.js frontend from a single command. Make sure you have installed the root dev dependencies first (`npm install` in the project root) and that ports `8000` and `3000` are free.
 
 ```bash
 cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
-.venv/bin/uvicorn zbus_architect.server:app --reload
-```
-
-2. In another terminal, start the frontend:
-
-```bash
-cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect/frontend
+npm install
 npm run dev
 ```
 
-3. Open `http://localhost:3000` in your browser.
+Open `http://localhost:3000` in your browser.
+
+If you prefer two separate terminals, you can also run:
+
+```bash
+# Terminal 1 — backend
+cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect
+.venv/bin/uvicorn zbus_architect.server:app --reload
+
+# Terminal 2 — frontend
+cd /home/ankit/Workspaces/fwProjects/iNode/zbus-architect/frontend
+npm run dev
+```
 
 4. Enter an absolute C source path (for example `/home/ankit/Workspaces/fwProjects/iNode/os/zephyr/samples/subsys/zbus/hello_world/src/main.c`) and click **Import**.
 

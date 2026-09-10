@@ -1,13 +1,13 @@
 {
-  "name": "zbus-architect-root",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "concurrently \"cd backend && uvicorn zbus_architect.server:app --reload --port 8000\" \"cd frontend && npm run dev\"",
-    "test:py": "cd backend && pytest",
-    "test": "npm run test:py"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.0"
-  }
+    "name": "zbus-architect-root",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently \"PYTHONPATH=backend .venv/bin/uvicorn zbus_architect.server:app --reload --port 8000\" \"cd frontend && npm run dev\"",
+        "test:py": "PYTHONPATH=backend .venv/bin/python -m pytest backend/tests",
+        "test": "npm run test:py"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.0"
+    }
 }
