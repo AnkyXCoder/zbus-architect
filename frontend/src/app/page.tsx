@@ -4,11 +4,22 @@ import { useState } from "react";
 
 import CheckPanel from "@/components/CheckPanel";
 import FlowCanvas from "@/components/FlowCanvas";
-import { fetchChecks, importProject } from "@/lib/api";
+import { fetchChecks, generateFiles, importProject } from "@/lib/api";
 import { useZbusStore } from "@/store/useZbusStore";
+
+function download(name: string, content: string) {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 export default function Home() {
     const [path, setPath] = useState("");
+    const architecture = useZbusStore((s) => s.architecture);
     const setArchitecture = useZbusStore((s) => s.setArchitecture);
     const setChecks = useZbusStore((s) => s.setChecks);
 
@@ -22,6 +33,21 @@ export default function Home() {
             setChecks(checks);
         } catch (err: any) {
             alert(err.message || "Import failed");
+        }
+    };
+
+    const handleExport = async () => {
+        if (!architecture) {
+            alert("Import a project first");
+            return;
+        }
+        try {
+            const files = await generateFiles(architecture);
+            for (const [name, content] of Object.entries(files)) {
+                download(name, content as string);
+            }
+        } catch (err: any) {
+            alert(err.message || "Export failed");
         }
     };
 
@@ -41,6 +67,12 @@ export default function Home() {
                     className="rounded bg-blue-600 px-3 py-1 text-sm font-medium hover:bg-blue-500"
                 >
                     Import
+                </button>
+                <button
+                    onClick={handleExport}
+                    className="rounded bg-green-600 px-3 py-1 text-sm font-medium hover:bg-green-500"
+                >
+                    Export
                 </button>
             </header>
             <section className="flex flex-1 overflow-hidden">
