@@ -9,7 +9,11 @@ from pathlib import Path
 import click
 
 from .checks import run_checks
-from .codegen import generate_zbus_channels_h, generate_zbus_observers_c
+from .codegen import (
+    generate_zbus_channels_h,
+    generate_zbus_messages_h,
+    generate_zbus_observers_c,
+)
 from .parser import parse_file, parse_source
 
 
@@ -46,6 +50,7 @@ def import_(path: Path, output: Path | None, pretty: bool) -> None:
 @click.option("--out-dir", "-d", type=click.Path(file_okay=False, path_type=Path), default=Path("."))
 def generate(path: Path, out_dir: Path) -> None:
     arch = parse_file(path)
+    (out_dir / "zbus_messages.h").write_text(generate_zbus_messages_h(arch))
     (out_dir / "zbus_channels.h").write_text(generate_zbus_channels_h(arch))
     (out_dir / "zbus_observers.c").write_text(generate_zbus_observers_c(arch))
     click.echo(f"Generated in {out_dir}")

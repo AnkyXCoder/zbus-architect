@@ -3,6 +3,7 @@
 #define ZBUS_GENERATED_CHANNELS_H
 
 #include <zephyr/zbus/zbus.h>
+#include "zbus_messages.h"
 ZBUS_CHAN_DEFINE(
     version_chan,                  /* Name */
     struct version_msg,          /* Message type */

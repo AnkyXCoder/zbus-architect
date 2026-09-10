@@ -11,6 +11,7 @@ import re
 from pathlib import Path
 
 from .model import Architecture, Channel, ChannelObservation, Observer, Thread
+from .struct_parser import parse_structs
 
 DQ = chr(34)
 SQ = chr(39)
@@ -304,6 +305,7 @@ def parse_source(text: str) -> Architecture:
         except ValueError:
             pass
 
+    arch.messages = parse_structs(text)
     return arch
 
 
