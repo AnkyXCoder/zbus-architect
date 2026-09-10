@@ -28,6 +28,7 @@ interface ZbusState {
     checks: ZbusCheck[];
     selectedNodeId: string | null;
     simulatingChannels: Set<string>;
+    connectMode: boolean;
     setArchitecture: (architecture: Architecture) => void;
     newArchitecture: () => void;
     clearAll: () => void;
@@ -35,6 +36,7 @@ interface ZbusState {
     setSelectedNodeId: (id: string | null) => void;
     simulatePublish: (channelName: string) => void;
     clearSimulation: () => void;
+    setConnectMode: (value: boolean) => void;
 
     addChannel: (channel: Channel) => void;
     addObserver: (observer: Observer) => void;
@@ -71,12 +73,14 @@ export const useZbusStore = create<ZbusState>((set) => ({
     checks: [],
     selectedNodeId: null,
     simulatingChannels: new Set(),
+    connectMode: false,
 
     setArchitecture: (architecture) => set({ architecture }),
     newArchitecture: () => set({ architecture: emptyArchitecture(), selectedNodeId: null }),
     clearAll: () => set({ architecture: null, checks: [], selectedNodeId: null, simulatingChannels: new Set() }),
     setChecks: (checks) => set({ checks }),
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+    setConnectMode: (value) => set({ connectMode: value }),
     simulatePublish: (channelName) => {
         set((s) => ({ simulatingChannels: new Set(s.simulatingChannels).add(channelName) }));
         setTimeout(() => {

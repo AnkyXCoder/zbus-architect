@@ -6,6 +6,7 @@ import { useZbusStore } from "@/store/useZbusStore";
 import type {
     Architecture,
     Channel,
+    MessageField,
     MessageType,
     Observer,
     ProxyAgent,
@@ -290,6 +291,34 @@ function ThreadForm({
     );
 }
 
+function parseDefinitionToFields(definition?: string): MessageField[] {
+    if (!definition) return [];
+    const match = definition.match(/struct\s+\w+\s*\{([\s\S]*)\}/);
+    if (!match) return [];
+    const body = match[1];
+    const fields: MessageField[] = [];
+    for (const line of body.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("//")) continue;
+        const m = trimmed.match(/([\w_]+)\s+([\w_]+)(\[\d+\])?;/);
+        if (m) {
+            fields.push({
+                type: m[1],
+                name: m[2],
+                array_size: m[3] ? parseInt(m[3].slice(1, -1), 10) : null,
+            });
+        }
+    }
+    return fields;
+}
+
+function fieldsToDefinition(name: string, fields: MessageField[]): string {
+    const body = fields
+        .map((f) => `    ${f.type} ${f.name}${f.array_size ? `[${f.array_size}]` : ""};`)
+        .join("\n");
+    return `struct ${name} {\n${body}\n};`;
+}
+
 function MessageForm({
     message,
     update,
@@ -298,19 +327,84 @@ function MessageForm({
     update: (m: MessageType) => void;
 }) {
     const [form, setForm] = useState<MessageType>(message);
+    const [fields, setFields] = useState<MessageField[]>([]);
 
     useEffect(() => {
         setForm(message);
+        setFields(message.fields?.length ? message.fields : parseDefinitionToFields(message.definition));
     }, [message]);
+
+    const setField = (idx: number, patch: Partial<MessageField>) => {
+        const next = fields.map((f, i) => (i === idx ? { ...f, ...patch } : f));
+        setFields(next);
+        setForm({ ...form, fields: next, definition: fieldsToDefinition(message.name, next) });
+    };
+
+    const addField = () => {
+        const next = [...fields, { name: `field_${fields.length + 1}`, type: "int" }];
+        setFields(next);
+        setForm({ ...form, fields: next, definition: fieldsToDefinition(message.name, next) });
+    };
+
+    const removeField = (idx: number) => {
+        const next = fields.filter((_, i) => i !== idx);
+        setFields(next);
+        setForm({ ...form, fields: next, definition: fieldsToDefinition(message.name, next) });
+    };
 
     return (
         <div className="p-2 text-slate-900 dark:text-slate-200">
             <h3 className="mb-3 text-sm font-semibold">Message: {message.name}</h3>
-            <Field label="Definition">
+            <Field label="Fields">
+                <div className="space-y-2">
+                    {fields.map((f, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={f.name}
+                                onChange={(e) => setField(i, { name: e.target.value })}
+                                placeholder="name"
+                                className="flex-1 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                            />
+                            <input
+                                type="text"
+                                value={f.type}
+                                onChange={(e) => setField(i, { type: e.target.value })}
+                                placeholder="type"
+                                className="w-20 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                            />
+                            <input
+                                type="number"
+                                value={f.array_size ?? ""}
+                                onChange={(e) =>
+                                    setField(i, {
+                                        array_size: e.target.value === "" ? null : Number(e.target.value),
+                                    })
+                                }
+                                placeholder="size"
+                                className="w-16 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                            />
+                            <button
+                                onClick={() => removeField(i)}
+                                className="rounded bg-red-700 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        onClick={addField}
+                        className="w-full rounded bg-slate-500 px-2 py-1 text-sm font-medium text-white hover:bg-slate-600"
+                    >
+                        Add field
+                    </button>
+                </div>
+            </Field>
+            <Field label="Generated definition">
                 <textarea
                     value={form.definition || ""}
                     onChange={(e) => setForm({ ...form, definition: e.target.value })}
-                    rows={8}
+                    rows={6}
                     className="w-full rounded bg-white px-2 py-1 font-mono text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
                 />
             </Field>

@@ -91,9 +91,10 @@ Once the page is open:
 - Enter an absolute C source path (for example `/home/ankit/Workspaces/fwProjects/iNode/os/zephyr/samples/subsys/zbus/hello_world/src/main.c`) and click **Import**, or click **Tutorial** to load a built-in example.
 - Drag components from the **Toolbar** onto the canvas.
 - Click a node to edit its properties in the right panel.
-- Drag from the right side of a channel to the left side of an observer to connect them.
-- Click **Simulate publish** on a channel to see animated data-flow arrows to its observers and the message type being passed.
+- Click **Connect** in the sidebar to show connection dots, then drag from one block to another; the dots hide again once connected.
+- Click **Simulate publish** on a channel to see animated data-flow arrows and the message type being passed.
 - A **Legend** in the top-left explains node colors and edge styles.
+- Select a **Message Type** node to configure its fields (name, type, array size) and see the generated C struct.
 - Click **Check** to validate the model.
 - Click **Export** to download `zbus_messages.h`, `zbus_channels.h`, and `zbus_observers.c`.
 - Click **New** to start a blank design, or **Clear** to wipe the canvas and build your own configuration from scratch.

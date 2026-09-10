@@ -30,7 +30,10 @@ All notable changes to this project will be documented in this file.
 - In-app tutorial with a loadable example and a Clear button to reset the canvas.
 - Rich tutorial architecture using all zbus macro combinations (listeners, subscribers, async listeners, message subscribers, threads, proxy agents, shadow channels, and runtime observations).
 - Visual data-flow simulation: click "Simulate publish" on a channel to animate arrows to its observers.
-- Custom node types with color coding, subtitles, and correct connectable handles (message-type nodes have no handles).
+- Custom node types with color coding, subtitles, and on-demand connection dots (Connect button toggles them; they hide after connecting).
+- Message-type nodes show no connection dots.
+- Message field editor in the property panel (name, type, array size) that regenerates the C struct definition.
+- Improved edge styling with smoothstep lines and arrowheads.
 - Legend panel on the canvas explaining node and edge types.
 - Message-type labels on edges during publish simulation.
 - Single `npm run dev` command to start both backend and frontend with `concurrently`.

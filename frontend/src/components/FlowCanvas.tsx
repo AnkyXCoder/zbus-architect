@@ -66,6 +66,7 @@ function CanvasInner() {
     const addObservation = useZbusStore((s) => s.addObservation);
     const setSelectedNodeId = useZbusStore((s) => s.setSelectedNodeId);
     const updateChannel = useZbusStore((s) => s.updateChannel);
+    const setConnectMode = useZbusStore((s) => s.setConnectMode);
 
     const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
@@ -168,9 +169,10 @@ function CanvasInner() {
                 id,
                 source,
                 target,
+                type: "smoothstep",
                 label: opts.label,
                 animated: !!opts.animated,
-                markerEnd: { type: MarkerType.Arrow },
+                markerEnd: { type: MarkerType.ArrowClosed },
                 style: {
                     strokeWidth: opts.animated ? 3 : 2,
                     strokeDasharray: opts.dashed ? "5 5" : undefined,
@@ -251,8 +253,10 @@ function CanvasInner() {
                     updateChannel(chName, { ...ch, proxy_agent: proxyName });
                 }
             }
+
+            setConnectMode(false);
         },
-        [addObservation, architecture, updateChannel]
+        [addObservation, architecture, setConnectMode, updateChannel]
     );
 
     const onNodeClick = useCallback(

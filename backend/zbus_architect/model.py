@@ -5,11 +5,21 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 
+class MessageField(BaseModel):
+    """A single field inside a message struct."""
+
+    name: str
+    type: str
+    array_size: Optional[int] = None
+    optional: bool = False
+
+
 class MessageType(BaseModel):
     """A message type (struct or union) used by a channel."""
 
     name: str
     definition: Optional[str] = None
+    fields: list[MessageField] = Field(default_factory=list)
     size: Optional[int] = None
     alignment: Optional[int] = None
 

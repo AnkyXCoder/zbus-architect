@@ -14,7 +14,13 @@ _ZBUS_MESSAGES_H_TEMPLATE = """
 #include <stdint.h>
 
 {%- for msg in architecture.messages %}
-{%- if msg.definition %}
+{%- if msg.fields %}
+struct {{ msg.name }} {
+{%- for f in msg.fields %}
+    {{ f.type }} {{ f.name }}{% if f.array_size %}[{{ f.array_size }}]{% endif %};
+{%- endfor %}
+};
+{%- elif msg.definition %}
 {{ msg.definition }}
 {%- endif %}
 {%- endfor %}
