@@ -358,20 +358,20 @@ function MessageForm({
             <Field label="Fields">
                 <div className="space-y-2">
                     {fields.map((f, i) => (
-                        <div key={i} className="flex items-center gap-2">
+                        <div key={i} className="flex flex-wrap items-center gap-2">
                             <input
                                 type="text"
                                 value={f.name}
                                 onChange={(e) => setField(i, { name: e.target.value })}
                                 placeholder="name"
-                                className="flex-1 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                                className="min-w-0 flex-1 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
                             />
                             <input
                                 type="text"
                                 value={f.type}
                                 onChange={(e) => setField(i, { type: e.target.value })}
                                 placeholder="type"
-                                className="w-20 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                                className="w-16 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
                             />
                             <input
                                 type="number"
@@ -382,7 +382,7 @@ function MessageForm({
                                     })
                                 }
                                 placeholder="size"
-                                className="w-16 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                                className="w-14 rounded bg-white px-2 py-1 text-sm text-slate-900 ring-1 ring-slate-300 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
                             />
                             <button
                                 onClick={() => removeField(i)}
@@ -474,7 +474,7 @@ export default function PropertyPanel() {
     const name = rest.join("-");
 
     return (
-        <div className="h-full overflow-auto border-l border-slate-300 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
+        <div className="h-full overflow-y-auto overflow-x-hidden border-l border-slate-300 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
             {prefix === "ch" && (
                 <ChannelForm
                     architecture={architecture}
